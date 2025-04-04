@@ -1,26 +1,12 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "mssql+pyodbc://usuario:senha@servidor/nome_do_banco?driver=ODBC+Driver+17+for+SQL+Server"
+# String de conexão (ajuste o nome do servidor se necessário)
+DATABASE_URL = "mssql+pyodbc://localhost/sistema_revenda?driver=ODBC+Driver+17+for+SQL+Server"
 
+# Criar engine e sessão
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Base para os modelos
 Base = declarative_base()
-
-
-
-
-
-
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from database import Base
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
