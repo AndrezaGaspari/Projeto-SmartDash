@@ -1,9 +1,8 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from banco_de_dados.database import Engine, Base, SessionLocal
-from banco_de_dados import schemas
+from banco_de_dados import crud, schemas
 from cruds import CadastroRevendedor
-from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -11,7 +10,7 @@ app = FastAPI()
 # Middleware de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ou ["*"] para liberar tudo
+    allow_origins=["*"],  # Libera para todos os domínios
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,14 +19,15 @@ app.add_middleware(
 # Cria tabelas no banco de dados
 Base.metadata.create_all(bind=Engine)
 
-    
-# Dependência para usar o banco
+# Dependência para obter sessão do banco
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+# ------------------- ROTAS DE REVENDEDORES -------------------
 
 @app.post("/revendedores", response_model=schemas.Revendedor)
 def criar_revendedor(revendedor: schemas.RevendedorCreate, db: Session = Depends(get_db)):
@@ -57,3 +57,27 @@ def deletar_revendedor(rev_id: int, db: Session = Depends(get_db)):
     if rev is None:
         raise HTTPException(status_code=404, detail="Revendedor não encontrado")
     return rev
+
+# ------------------- ROTAS DE ITENS -------------------
+
+@app.get("/items", response_model=list[schemas.Item])
+def pegar(db: Session = Depends(get_db)):
+    return crud.listar_itens(db)
+
+@app.post("/items", response_model=schemas.Item)
+def criar_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
+    return crud.criar_item(db=db, item=item)
+
+@app.put("/items/{item_id}", response_model=schemas.Item)
+def atualizar(item_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)):
+    atualizado = crud.atualizar_item(db, item_id, item)
+    if atualizado:
+        return atualizado
+    raise HTTPException(status_code=404, detail="Item não encontrado")
+
+@app.delete("/items/{item_id}", response_model=schemas.Item)
+def deletar_item(item_id: int, db: Session = Depends(get_db)):
+    deletado = crud.deletar_item(db, item_id)
+    if deletado:
+        return deletado
+    raise HTTPException(status_code=404, detail="Item não encontrado")
