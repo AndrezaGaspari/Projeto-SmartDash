@@ -1,21 +1,29 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from banco_de_dados.database import Engine, Base, SessionLocal
-from banco_de_dados import schemas
+from banco_de_dados import schemas #temporariamente até ativar o crud.py
+#from banco_de_dados import schemas
 from cruds import CadastroRevendedor,CarrinhoProdutos
 
+from cruds import CadastroProdutos
+from cruds import CadastroLojas
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+
 # Middleware de CORS
+
+from fastapi.middleware.cors import CORSMiddleware
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Libera para todos os domínios
+    allow_origins=["*"],  # ou ["http://127.0.0.1:5500"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Cria tabelas no banco de dados
 Base.metadata.create_all(bind=Engine)
@@ -85,12 +93,49 @@ def atualizar_carrinho(rev_id = int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Revendedor não encontrado")
     return rev'''
 =======
+# ------------------- ROTAS DE PRODUTOS -------------------
+
+
+@app.post("/produtos", response_model=schemas.Produto)
+def criar_produto(produto: schemas.ProdutoCreate, db: Session = Depends(get_db)):
+    return CadastroProdutos.criar_produto(db, produto)
+
+
+@app.get("/produtos", response_model=list[schemas.Produto])
+def listar_produtos(db: Session = Depends(get_db)):
+    return CadastroProdutos.listar_produtos(db)
+
+@app.get("/produtos/{prod_id}", response_model=schemas.Produto)
+def buscar_produto(prod_id: int, db: Session = Depends(get_db)):
+    prod = CadastroProdutos.buscar_produto(db, prod_id)
+    if prod is None:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    return prod
+
+@app.put("/produtos/{prod_id}", response_model=schemas.Produto)
+def atualizar_produto(prod_id: int, produto: schemas.ProdutoCreate, db: Session = Depends(get_db)):
+    prod = CadastroProdutos.atualizar_produto(db, prod_id, produto)
+    if prod is None:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    return prod
+
+@app.delete("/produtos/{prod_id}", response_model=schemas.Produto)
+def deletar_produto(prod_id: int, db: Session = Depends(get_db)):
+    prod = CadastroProdutos.deletar_produto(db, prod_id)
+    if prod is None:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    return prod
+
 
 # ------------------- ROTAS DE ITENS -------------------
 
-@app.get("/items", response_model=list[schemas.Item])
+@app.get("/items", response_model=list[schemas.Produto])  # Alterado para Produto que é realmnete temos 
 def pegar(db: Session = Depends(get_db)):
     return crud.listar_itens(db)
+
+#@app.get("/items", response_model=list[schemas.Item])
+#def pegar(db: Session = Depends(get_db)):
+ #   return crud.listar_itens(db)
 
 @app.post("/items", response_model=schemas.Item)
 def criar_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
@@ -110,3 +155,39 @@ def deletar_item(item_id: int, db: Session = Depends(get_db)):
         return deletado
     raise HTTPException(status_code=404, detail="Item não encontrado")
 
+
+'''
+# ------------------- ROTAS DE LOJAS -------------------
+
+
+@app.post("/lojas", response_model=schemas.Loja)
+def criar_loja(loja: schemas.LojaCreate, db: Session = Depends(get_db)):
+    return CadastroLojas.criar_loja(db, loja)
+
+
+@app.get("/lojas", response_model=list[schemas.Loja])
+def listar_lojas(db: Session = Depends(get_db)):
+    return CadastroProdutos.listar_produtos(db)
+
+@app.get("/produtos/{prod_id}", response_model=schemas.Produto)
+def buscar_produto(prod_id: int, db: Session = Depends(get_db)):
+    prod = CadastroProdutos.buscar_produto(db, prod_id)
+    if prod is None:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    return prod
+
+@app.put("/produtos/{prod_id}", response_model=schemas.Produto)
+def atualizar_produto(prod_id: int, produto: schemas.ProdutoCreate, db: Session = Depends(get_db)):
+    prod = CadastroProdutos.atualizar_produto(db, prod_id, produto)
+    if prod is None:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    return prod
+
+@app.delete("/produtos/{prod_id}", response_model=schemas.Produto)
+def deletar_produto(prod_id: int, db: Session = Depends(get_db)):
+    prod = CadastroProdutos.deletar_produto(db, prod_id)
+    if prod is None:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    return prod
+
+'''

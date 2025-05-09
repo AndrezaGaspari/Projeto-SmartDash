@@ -1,7 +1,7 @@
-"""from sqlalchemy.orm import Session
-from ..banco_de_dados import models, schemas
+'''from sqlalchemy.orm import Session
+from banco_de_dados import models, schemas
 
-def criar_item(db: Session, item: schemas.ItemCreate):
+def criar_item(db: Session, item: schemas.ProdutoCreate):  # <-- Aqui está a mudança
     db_item = models.ItemDB(**item.dict())
     db.add(db_item)
     db.commit()
@@ -11,14 +11,14 @@ def criar_item(db: Session, item: schemas.ItemCreate):
 def listar_itens(db: Session):
     return db.query(models.ItemDB).all()
 
-def atualizar_item(db: Session, item_id: int, novo_item: schemas.ItemCreate):
+def atualizar_item(db: Session, item_id: int, novo_item: schemas.ProdutoCreate):  # <-- Aqui também
     item = db.query(models.ItemDB).filter(models.ItemDB.id == item_id).first()
     if item:
         item.nome = novo_item.nome
         item.descricao = novo_item.descricao
         db.commit()
         db.refresh(item)
-        return item n
+        return item 
     return None
 
 def deletar_item(db: Session, item_id: int):
@@ -28,4 +28,4 @@ def deletar_item(db: Session, item_id: int):
         db.commit()
         return item
     return None
-"""
+'''

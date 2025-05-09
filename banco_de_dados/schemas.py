@@ -1,14 +1,14 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List,Optional
 from datetime import date
 
 # Produto
 class ProdutoBase(BaseModel):
     nome: str
     descricao: str
-    vencimento: date
+    vencimento: Optional[date] = None
     quantidade: int
-    fabricacao: date
+    fabricacao:Optional[date] = None
     valor_produto: float
     categoria: str
     fk_loja_id: int
@@ -80,5 +80,21 @@ class PedidoCreate(PedidoBase):
 class Pedido(PedidoBase):
     id: int
 
+    class Config:
+        from_attributes = True
+
+#item
+class ItemBase(BaseModel):
+    nome: str
+    descricao: str
+    valor_produto: float
+    categoria: str
+    fk_loja_id: int
+
+class ItemCreate(ItemBase):
+    pass
+
+class Item(ItemBase):
+    id: int
     class Config:
         from_attributes = True
