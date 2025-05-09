@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from banco_de_dados.database import Engine, Base, SessionLocal
-from banco_de_dados import crud, schemas #temporariamente até ativar o crud.py
+from banco_de_dados import schemas #temporariamente até ativar o crud.py
 #from banco_de_dados import schemas
-from cruds import CadastroRevendedor
+from cruds import CadastroRevendedor,CarrinhoProdutos
+
 from cruds import CadastroProdutos
 from cruds import CadastroLojas
 from fastapi.middleware.cors import CORSMiddleware
@@ -66,6 +67,32 @@ def deletar_revendedor(rev_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Revendedor não encontrado")
     return rev
 
+# ------------------- ROTAS DO CARRINHO -------------------
+
+'''@app.get("/carrinho", response_model=schemas.Pedido)
+def lista_carrinho(db: Session = Depends(get_db)):
+    return CarrinhoProdutos.listar_carrinho
+
+
+@app.post("/carrinho", response_model=schemas.Pedido)
+def criar_carrinho(pedido: schemas.PedidoCreate, db: Session = Depends(get_db)):
+    return CarrinhoProdutos.criar_carrinho(db,pedido)
+
+
+@app.put("/carrinho/{rev_id}", response_model=schemas.Pedido)
+def atualizar_carrinho(rev_id = int, db: Session = Depends(get_db), revendedor = schemas.RevendedorCreates):
+    rev = CarrinhoProdutos.atualizar_carrinho(rev_id, db, revendedor)
+    if rev is None:
+        raise HTTPException(status_code=404, detail="Revendedor não encontrado")
+    return rev
+
+@app.delete("/carrinho/{rev_id}", response_model=schemas.Pedido)
+def atualizar_carrinho(rev_id = int, db: Session = Depends(get_db)):
+    rev = CadastroRevendedor.deletar_Carrinho(db, rev_id)
+    if rev is None:
+        raise HTTPException(status_code=404, detail="Revendedor não encontrado")
+    return rev'''
+=======
 # ------------------- ROTAS DE PRODUTOS -------------------
 
 
@@ -127,6 +154,7 @@ def deletar_item(item_id: int, db: Session = Depends(get_db)):
     if deletado:
         return deletado
     raise HTTPException(status_code=404, detail="Item não encontrado")
+
 
 '''
 # ------------------- ROTAS DE LOJAS -------------------
