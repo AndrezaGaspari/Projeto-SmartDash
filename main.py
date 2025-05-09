@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from banco_de_dados.database import Engine, Base, SessionLocal
 from banco_de_dados import schemas
 from cruds import CadastroRevendedor,CarrinhoProdutos
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -58,8 +59,6 @@ def deletar_revendedor(rev_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Revendedor não encontrado")
     return rev
 
-# ------------------- ROTAS DE ITENS -------------------
-
 # ------------------- ROTAS DO CARRINHO -------------------
 
 '''@app.get("/carrinho", response_model=schemas.Pedido)
@@ -85,3 +84,29 @@ def atualizar_carrinho(rev_id = int, db: Session = Depends(get_db)):
     if rev is None:
         raise HTTPException(status_code=404, detail="Revendedor não encontrado")
     return rev'''
+=======
+
+# ------------------- ROTAS DE ITENS -------------------
+
+@app.get("/items", response_model=list[schemas.Item])
+def pegar(db: Session = Depends(get_db)):
+    return crud.listar_itens(db)
+
+@app.post("/items", response_model=schemas.Item)
+def criar_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
+    return crud.criar_item(db=db, item=item)
+
+@app.put("/items/{item_id}", response_model=schemas.Item)
+def atualizar(item_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)):
+    atualizado = crud.atualizar_item(db, item_id, item)
+    if atualizado:
+        return atualizado
+    raise HTTPException(status_code=404, detail="Item não encontrado")
+
+@app.delete("/items/{item_id}", response_model=schemas.Item)
+def deletar_item(item_id: int, db: Session = Depends(get_db)):
+    deletado = crud.deletar_item(db, item_id)
+    if deletado:
+        return deletado
+    raise HTTPException(status_code=404, detail="Item não encontrado")
+
