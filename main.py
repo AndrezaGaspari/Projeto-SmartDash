@@ -58,6 +58,7 @@ def deletar_revendedor(rev_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Revendedor não encontrado")
     return rev
 
+
 # ------------------- ROTAS DE ITENS -------------------
 
 @app.get("/items", response_model=list[schemas.Item])

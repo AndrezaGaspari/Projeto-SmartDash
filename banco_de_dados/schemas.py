@@ -28,6 +28,7 @@ class LojaBase(BaseModel):
     estado: str
     cidade: str
     cnpj: str
+    senha: str  # Adicionado conforme modelo
 
 class LojaCreate(LojaBase):
     pass
@@ -46,6 +47,13 @@ class RevendedorBase(BaseModel):
     email: str
     senha: str
     cpf: str
+    telefone: str
+    data_nascimento: date
+    cep: str
+    rua: str
+    numero_casa: int
+    complemento: Optional[str] = None
+    bairro: str
     fk_loja_id: int
 
 class RevendedorCreate(RevendedorBase):
@@ -64,7 +72,7 @@ class PedidoBase(BaseModel):
     data_pedido: date
     status: bool
     fk_revendedor_id: int
-    produto_ids: List[int]
+    produto_ids: List[int]  # Para relacionamento N:N
 
 class PedidoCreate(PedidoBase):
     pass

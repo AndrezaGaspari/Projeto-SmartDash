@@ -17,6 +17,7 @@ class Loja(Base):
     estado = Column(String)
     cidade = Column(String)
     cnpj = Column(String)
+    senha = Column(String)
 
     produtos = relationship("Produto", back_populates="loja")
     revendedores = relationship("Revendedor", back_populates="loja")
@@ -45,6 +46,13 @@ class Revendedor(Base):
     email = Column(String)
     senha = Column(String)
     cpf = Column(String)
+    telefone = Column(String)
+    data_nascimento = Column(Date)
+    cep = Column(String)
+    rua = Column(String)
+    numero_casa = Column(Integer)
+    complemento = Column(String)
+    bairro = Column(String)
     fk_loja_id = Column(Integer, ForeignKey("loja.id"))
 
     loja = relationship("Loja", back_populates="revendedores")
