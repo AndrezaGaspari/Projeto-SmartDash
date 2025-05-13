@@ -28,7 +28,7 @@ class LojaBase(BaseModel):
     estado: str
     cidade: str
     cnpj: str
-    senha: str  # Adicionado conforme modelo
+    senha: str  
 
 class LojaCreate(LojaBase):
     pass

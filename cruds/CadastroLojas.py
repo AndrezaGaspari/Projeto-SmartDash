@@ -1,4 +1,4 @@
-'''from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session
 from banco_de_dados import models, schemas
 
 # CRUD Lojas
@@ -17,7 +17,7 @@ def listar_lojas(db: Session):
 def buscar_lojas(db: Session, loj_id: int):
     return db.query(models.Loja).filter(models.Loja.id == loj_id).first()
 
-def atualizar_lojas(db: Session, loj_id: int, novo: schemas.ProdutoCreate):
+def atualizar_lojas(db: Session, loj_id: int, novo: schemas.LojaCreate):
     loja = buscar_lojas(db, loj_id)
     if loja:
         for key, value in novo.dict().items():
@@ -34,4 +34,3 @@ def deletar_loja(db: Session, loj_id: int):
         db.commit()
         return loja
     return None
-'''
