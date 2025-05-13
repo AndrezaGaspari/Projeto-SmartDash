@@ -4,7 +4,6 @@ from banco_de_dados.database import Engine, Base, SessionLocal
 from banco_de_dados import schemas #temporariamente até ativar o crud.py
 #from banco_de_dados import schemas
 from cruds import CadastroRevendedor,CarrinhoProdutos
-
 from cruds import CadastroProdutos
 from cruds import CadastroLojas
 from fastapi.middleware.cors import CORSMiddleware
@@ -92,7 +91,7 @@ def atualizar_carrinho(rev_id = int, db: Session = Depends(get_db)):
     if rev is None:
         raise HTTPException(status_code=404, detail="Revendedor não encontrado")
     return rev'''
-=======
+
 # ------------------- ROTAS DE PRODUTOS -------------------
 
 
@@ -126,37 +125,6 @@ def deletar_produto(prod_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     return prod
 
-
-# ------------------- ROTAS DE ITENS -------------------
-
-@app.get("/items", response_model=list[schemas.Produto])  # Alterado para Produto que é realmnete temos 
-def pegar(db: Session = Depends(get_db)):
-    return crud.listar_itens(db)
-
-#@app.get("/items", response_model=list[schemas.Item])
-#def pegar(db: Session = Depends(get_db)):
- #   return crud.listar_itens(db)
-
-@app.post("/items", response_model=schemas.Item)
-def criar_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
-    return crud.criar_item(db=db, item=item)
-
-@app.put("/items/{item_id}", response_model=schemas.Item)
-def atualizar(item_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)):
-    atualizado = crud.atualizar_item(db, item_id, item)
-    if atualizado:
-        return atualizado
-    raise HTTPException(status_code=404, detail="Item não encontrado")
-
-@app.delete("/items/{item_id}", response_model=schemas.Item)
-def deletar_item(item_id: int, db: Session = Depends(get_db)):
-    deletado = crud.deletar_item(db, item_id)
-    if deletado:
-        return deletado
-    raise HTTPException(status_code=404, detail="Item não encontrado")
-
-
-'''
 # ------------------- ROTAS DE LOJAS -------------------
 
 
@@ -167,27 +135,25 @@ def criar_loja(loja: schemas.LojaCreate, db: Session = Depends(get_db)):
 
 @app.get("/lojas", response_model=list[schemas.Loja])
 def listar_lojas(db: Session = Depends(get_db)):
-    return CadastroProdutos.listar_produtos(db)
+    return CadastroLojas.listar_lojas(db)
 
-@app.get("/produtos/{prod_id}", response_model=schemas.Produto)
-def buscar_produto(prod_id: int, db: Session = Depends(get_db)):
-    prod = CadastroProdutos.buscar_produto(db, prod_id)
-    if prod is None:
-        raise HTTPException(status_code=404, detail="Produto não encontrado")
-    return prod
+@app.get("/lojas/{loj_id}", response_model=schemas.Loja)
+def buscar_loja(loj_id: int, db: Session = Depends(get_db)):
+    loj = CadastroLojas.buscar_lojas(db, loj_id)
+    if loj is None:
+        raise HTTPException(status_code=404, detail="Loja não encontrada")
+    return loj
 
-@app.put("/produtos/{prod_id}", response_model=schemas.Produto)
-def atualizar_produto(prod_id: int, produto: schemas.ProdutoCreate, db: Session = Depends(get_db)):
-    prod = CadastroProdutos.atualizar_produto(db, prod_id, produto)
-    if prod is None:
-        raise HTTPException(status_code=404, detail="Produto não encontrado")
-    return prod
+@app.put("/lojas/{loj_id}", response_model=schemas.Loja)
+def atualizar_loja(loj_id: int, loja: schemas.LojaCreate, db: Session = Depends(get_db)):
+    loj = CadastroLojas.atualizar_lojas(db, loj_id, loja)
+    if loj is None:
+        raise HTTPException(status_code=404, detail="Loja não encontrada")
+    return loj
 
-@app.delete("/produtos/{prod_id}", response_model=schemas.Produto)
-def deletar_produto(prod_id: int, db: Session = Depends(get_db)):
-    prod = CadastroProdutos.deletar_produto(db, prod_id)
-    if prod is None:
-        raise HTTPException(status_code=404, detail="Produto não encontrado")
-    return prod
-
-'''
+@app.delete("/lojas/{loj_id}", response_model=schemas.Loja)
+def deletar_loja(loj_id: int, db: Session = Depends(get_db)):
+    loj = CadastroLojas.deletar_loja(db, loj_id)
+    if loj is None:
+        raise HTTPException(status_code=404, detail="Loja não encontradao")
+    return loj
