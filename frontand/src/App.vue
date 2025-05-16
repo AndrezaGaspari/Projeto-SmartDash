@@ -29,6 +29,7 @@ const revendedorNumeroCasa = ref('');
 const revendedorComplemento = ref('');
 const revendedorBairro = ref('');
 const revendedorIdLoja = ref('');
+const revendedorSenha = ref(''); // Novo campo senha para revendedor
 
 // Campos do formulário de loja
 const lojaCep = ref('');
@@ -37,6 +38,7 @@ const lojaNomeFantasia = ref('');
 const lojaRazaoSocial = ref('');
 const lojaTelefone = ref('');
 const lojaEmail = ref('');
+const lojaSenha = ref(''); // Novo campo senha para loja
 
 const paginaAtual = ref(usuarioLogado.value ? 'produtos' : '');
 const tituloPagina = ref('Produtos Agrícolas');
@@ -59,6 +61,14 @@ const filtroPrecoMax = ref(null);
 const filtroDisponibilidade = ref('');
 const produtoSelecionado = ref(null);
 const isAdmin = ref(true);
+const pedidosRevendedor = ref([]);
+const pedidosAprovacao = ref([
+    { id: 'PR001', revendedor: 'Revendedor A', itens: [{ nome: 'Fertilizante Nitrogenado', quantidade: 2 }, { nome: 'Semente de Milho Híbrido', quantidade: 1 }], status: 'pendente' },
+    { id: 'PR002', revendedor: 'Revendedor B', itens: [{ nome: 'Herbicida Seletivo', quantidade: 3 }], status: 'pendente' },
+]);
+const produtoEditando = ref(null);
+const edicaoNome = ref('');
+const edicaoPreco = ref(null);
 
 const produtosFiltrados = computed(() => {
     return produtos.value.filter(produto => {
@@ -83,34 +93,52 @@ watch(paginaAtual, (novaPagina) => {
         mostrarCadastroLojaModal.value = false;
         switch (novaPagina) {
             case 'produtos':
-                tituloPagina.value = 'Produtos Agrícolas';
-                mensagem.value = 'Explore nossa variedade de produtos de alta qualidade para sua lavoura.';
+                tituloPagina.value = 'Catálogo de Produtos';
+                mensagem.value = 'Selecione os produtos para revenda.';
                 lista.value = [];
+                produtoEditando.value = null; // Reset edição ao mudar de página
                 break;
             case 'pedidos':
-                tituloPagina.value = 'Gerenciamento de Pedidos';
-                mensagem.value = 'Visualize e gerencie seus pedidos de forma eficiente.';
-                lista.value = ['Pedido #123', 'Pedido #456', 'Pedido #789'];
+                tituloPagina.value = 'Meus Pedidos';
+                mensagem.value = 'Acompanhe seus pedidos de revenda.';
+                lista.value = pedidosRevendedor.value.map(pedido => `Pedido com ${pedido.itens ? pedido.itens.length : 1} item(s)`);
+                produtoEditando.value = null;
+                break;
+            case 'aprovacoes':
+                tituloPagina.value = 'Aprovação de Pedidos';
+                mensagem.value = 'Aprove ou rejeite os pedidos dos revendedores.';
+                lista.value = [];
+                produtoEditando.value = null;
+                break;
+            case 'dashboard':
+                tituloPagina.value = 'Dashboard de Vendas';
+                mensagem.value = 'Métricas de vendas e desempenho.';
+                lista.value = [];
+                produtoEditando.value = null;
                 break;
             case 'vendas':
-                tituloPagina.value = 'Relatório de Vendas';
-                mensagem.value = 'Acompanhe o desempenho de suas vendas e gere relatórios detalhados.';
+                tituloPagina.value = 'Relatórios de Vendas';
+                mensagem.value = 'Histórico e desempenho de suas vendas.';
                 lista.value = ['Venda Jan: R$ 10.000', 'Venda Fev: R$ 12.500', 'Venda Mar: R$ 11.800'];
+                produtoEditando.value = null;
                 break;
             case 'sobre':
                 tituloPagina.value = 'Sobre a Nossa Empresa';
                 mensagem.value = 'Conheça nossa história, missão e valores.';
                 lista.value = ['Fundação em 2020', 'Foco em sustentabilidade', 'Parcerias com produtores locais'];
+                produtoEditando.value = null;
                 break;
             case 'contato':
                 tituloPagina.value = 'Entre em Contato Conosco';
                 mensagem.value = 'Estamos à disposição para tirar suas dúvidas e oferecer suporte.';
                 lista.value = ['Email: contato@smartdash.com', 'Telefone: (XX) XXXXX-XXXX', 'Formulário de contato'];
+                produtoEditando.value = null;
                 break;
             default:
                 tituloPagina.value = 'SmartDash';
                 mensagem.value = 'Bem-vindo ao seu painel de controle inteligente!';
                 lista.value = [];
+                produtoEditando.value = null;
                 break;
         }
         produtoSelecionado.value = null;
@@ -163,6 +191,14 @@ function mostrarCadastroLoja() {
 }
 
 function login() {
+    // Login de teste
+    if (loginEmail.value === 'teste' && loginSenha.value === 'teste') {
+        usuarioLogado.value = true;
+        loginEmail.value = '';
+        loginSenha.value = '';
+        return;
+    }
+
     if (loginEmail.value === 'teste@email.com' && loginSenha.value === '123456') {
         usuarioLogado.value = true;
         loginEmail.value = '';
@@ -178,6 +214,7 @@ function cadastrarRevendedor() {
         cidade: revendedorCidade.value,
         estado: revendedorEstado.value,
         email: revendedorEmail.value,
+        senha: revendedorSenha.value, // Senha do revendedor
         cpf: revendedorCpf.value,
         telefoneCelular: revendedorTelefoneCelular.value,
         dataNascimento: revendedorDataNascimento.value,
@@ -196,6 +233,7 @@ function cadastrarRevendedor() {
     revendedorCidade.value = '';
     revendedorEstado.value = '';
     revendedorEmail.value = '';
+    revendedorSenha.value = '';
     revendedorCpf.value = '';
     revendedorTelefoneCelular.value = '';
     revendedorDataNascimento.value = '';
@@ -215,6 +253,7 @@ function cadastrarLoja() {
         razaoSocial: lojaRazaoSocial.value,
         telefone: lojaTelefone.value,
         email: lojaEmail.value,
+        senha: lojaSenha.value, // Senha da loja
     });
     alert('Cadastro de loja realizado com sucesso! Faça login.');
     mostrarCadastroLojaModal.value = false;
@@ -226,6 +265,7 @@ function cadastrarLoja() {
     lojaRazaoSocial.value = '';
     lojaTelefone.value = '';
     lojaEmail.value = '';
+    lojaSenha.value = '';
 }
 
 function logout() {
@@ -241,8 +281,60 @@ function navegarPara(pagina) {
     }
 }
 
+function adicionarAoPedido(produto) {
+    pedidosRevendedor.value.push({ produtoId: produto.id, nome: produto.nome, preco: produto.preco, quantidade: 1 });
+    alert(`${produto.nome} adicionado ao pedido.`);
+}
+
+function enviarPedido() {
+    if (pedidosRevendedor.value.length > 0) {
+        console.log('Pedido enviado:', pedidosRevendedor.value);
+        alert('Pedido enviado para aprovação!');
+        pedidosRevendedor.value = [];
+        navegarPara('pedidos');
+    } else {
+        alert('Seu pedido está vazio.');
+    }
+}
+
 function selecionarProduto(produto) {
     produtoSelecionado.value = produto;
+}
+
+function aprovarPedido(pedido) {
+    alert(`Pedido ${pedido.id} aprovado.`);
+    pedido.status = 'aprovado';
+}
+
+function rejeitarPedido(pedido) {
+    alert(`Pedido ${pedido.id} rejeitado.`);
+    pedido.status = 'rejeitado';
+}
+
+function editarProduto(produto) {
+    produtoEditando.value = produto;
+    edicaoNome.value = produto.nome;
+    edicaoPreco.value = produto.preco;
+}
+
+function salvarEdicaoProduto() {
+    if (produtoEditando.value) {
+        const index = produtos.value.findIndex(p => p.id === produtoEditando.value.id);
+        if (index !== -1) {
+            produtos.value[index].nome = edicaoNome.value;
+            produtos.value[index].preco = parseFloat(edicaoPreco.value);
+            produtoEditando.value = null;
+            alert('Produto atualizado com sucesso!');
+        }
+    }
+}
+
+function cancelarEdicaoProduto() {
+    produtoEditando.value = null;
+}
+
+function selecionarPedido(pedido) {
+    produtoSelecionado.value = pedido;
 }
 
 onMounted(() => {
@@ -260,8 +352,10 @@ onMounted(() => {
         </div>
         <nav>
             <a href="#" :class="{ active: paginaAtual === 'produtos' }" @click.prevent="navegarPara('produtos')">Produtos</a>
-            <a href="#" :class="{ active: paginaAtual === 'pedidos' }" @click.prevent="navegarPara('pedidos')">Pedidos</a>
-            <a href="#" :class="{ active: paginaAtual === 'vendas' }" @click.prevent="navegarPara('vendas')">Vendas</a>
+            <a href="#" :class="{ active: paginaAtual === 'pedidos' }" @click.prevent="navegarPara('pedidos')">Meus Pedidos</a>
+            <a v-if="isAdmin" href="#" :class="{ active: paginaAtual === 'aprovacoes' }" @click.prevent="navegarPara('aprovacoes')">Aprovações</a>
+            <a v-if="isAdmin" href="#" :class="{ active: paginaAtual === 'dashboard' }" @click.prevent="navegarPara('dashboard')">Dashboard</a>
+            <a href="#" :class="{ active: paginaAtual === 'vendas' }" @click.prevent="navegarPara('vendas')">Relatórios</a>
             <a href="#" :class="{ active: paginaAtual === 'sobre' }" @click.prevent="navegarPara('sobre')">Sobre Nós</a>
             <a href="#" :class="{ active: paginaAtual === 'contato' }" @click.prevent="navegarPara('contato')">Contato</a>
             <button @click="logout">Sair</button>
@@ -326,6 +420,10 @@ onMounted(() => {
             <div class="form-group">
                 <label for="revendedorEmail">Email:</label>
                 <input type="email" id="revendedorEmail" v-model="revendedorEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="revendedorSenha">Senha:</label>
+                <input type="password" id="revendedorSenha" v-model="revendedorSenha" required>
             </div>
             <div class="form-group">
                 <label for="revendedorCpf">CPF:</label>
@@ -400,6 +498,10 @@ onMounted(() => {
                 <input type="email" id="lojaEmail" v-model="lojaEmail" required>
             </div>
             <div class="form-group">
+                <label for="lojaSenha">Senha:</label>
+                <input type="password" id="lojaSenha" v-model="lojaSenha" required>
+            </div>
+            <div class="form-group">
                 <button type="submit">Cadastrar como Loja</button>
             </div>
             <div class="link-cadastro">
@@ -440,11 +542,21 @@ onMounted(() => {
                 <img :src="produto.imagem" :alt="produto.nome">
                 <h3>{{ produto.nome }}</h3>
                 <p class="preco">R$ {{ produto.preco.toFixed(2) }}</p>
+                <button @click="adicionarAoPedido(produto)">Adicionar ao Pedido</button>
                 <button @click="selecionarProduto(produto)">Ver Detalhes</button>
-                <button v-if="isAdmin">Editar</button>
+                <button v-if="isAdmin" @click="editarProduto(produto)">Editar</button>
             </div>
         </div>
 
+        <div v-if="pedidosRevendedor.length > 0" class="meu-pedido">
+            <h2>Meu Pedido</h2>
+            <ul>
+                <li v-for="item in pedidosRevendedor" :key="item.produtoId">
+                    {{ item.nome }} - R$ {{ item.preco.toFixed(2) }}
+                </li>
+            </ul>
+            <button @click="enviarPedido">Enviar Pedido</button>
+        </div>
 
         <div v-if="produtoSelecionado" class="detalhes-produto">
             <h2>Detalhes do Produto</h2>
@@ -453,13 +565,81 @@ onMounted(() => {
             <p>Categoria: {{ produtoSelecionado.categoria }}</p>
             <p>Disponibilidade: {{ produtoSelecionado.disponivel ? 'Em estoque' : 'Esgotado' }}</p>
         </div>
+
+        <div v-if="produtoEditando" class="editar-produto">
+            <h2>Editar Produto</h2>
+            <div class="form-group">
+                <label for="edicaoNome">Nome:</label>
+                <input type="text" id="edicaoNome" v-model="edicaoNome" required>
+            </div>
+            <div class="form-group">
+                <label for="edicaoPreco">Preço:</label>
+                <input type="number" id="edicaoPreco" v-model="edicaoPreco" required>
+            </div>
+            <button @click="salvarEdicaoProduto">Salvar Edição</button>
+            <button @click="cancelarEdicaoProduto">Cancelar</button>
+        </div>
     </div>
 
     <div class="container" v-else-if="paginaAtual === 'pedidos' && usuarioLogado">
-        <h1>Gerenciamento de Pedidos</h1>
+        <h1>Meus Pedidos</h1>
         <ul>
-            <li v-for="pedido in lista">{{ pedido }}</li>
+            <li v-for="(pedido, index) in pedidosRevendedor" :key="index">
+                Pedido com {{ pedido.itens ? pedido.itens.length : 1 }} item(s) -
+                <button @click="selecionarPedido(pedido)">Ver Detalhes</button>
+            </li>
         </ul>
+        <div v-if="produtoSelecionado" class="detalhes-pedido">
+            <h2>Detalhes do Pedido</h2>
+            <ul>
+                <li v-for="item in pedidosRevendedor.find(p => p === produtoSelecionado)?.itens" :key="item.produtoId">
+                    {{ item.nome }} - R$ {{ item.preco.toFixed(2) }}
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container" v-else-if="paginaAtual === 'aprovacoes' && usuarioLogado && isAdmin">
+        <h1>Aprovação de Pedidos</h1>
+        <ul v-if="pedidosAprovacao.length > 0">
+            <li v-for="pedido in pedidosAprovacao" :key="pedido.id">
+                Pedido #{{ pedido.id }} de {{ pedido.revendedor }} ({{ pedido.itens.length }} itens) - Status: {{ pedido.status }}
+                <button @click="aprovarPedido(pedido)" :disabled="pedido.status !== 'pendente'">Aprovar</button>
+                <button @click="rejeitarPedido(pedido)" :disabled="pedido.status !== 'pendente'">Rejeitar</button>
+                <button @click="selecionarPedido(pedido)">Ver Detalhes</button>
+            </li>
+        </ul>
+        <p v-else>Não há pedidos pendentes para aprovação.</p>
+        <div v-if="produtoSelecionado" class="detalhes-pedido">
+            <h2>Detalhes do Pedido #{{ produtoSelecionado.id }}</h2>
+            <ul>
+                <li v-for="item in produtoSelecionado.itens" :key="item.nome">
+                    {{ item.nome }} - Quantidade: {{ item.quantidade }}
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container" v-else-if="paginaAtual === 'dashboard' && usuarioLogado && isAdmin">
+        <h1>Dashboard de Vendas</h1>
+        <div class="metricas">
+            <div>
+                <h3>Vendas por Estado (Simulado)</h3>
+                <ul>
+                    <li>SP: R$ 50.000</li>
+                    <li>MG: R$ 35.000</li>
+                    <li>PR: R$ 42.000</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Produtos Mais Vendidos (Simulado)</h3>
+                <ol>
+                    <li>Fertilizante Nitrogenado</li>
+                    <li>Semente de Soja RR</li>
+                    <li>Herbicida Seletivo</li>
+                </ol>
+            </div>
+        </div>
     </div>
 
     <div class="container" v-else-if="paginaAtual === 'vendas' && usuarioLogado">
@@ -489,267 +669,3 @@ onMounted(() => {
         <p>&copy; 2025 Desenvolvido por Ana Luiza, Andreza, Fernanda, Gustavo, Maria Eduarda e Vitor Hugo</p>
     </section>
 </template>
-
-<style scoped>
-/* Estilos gerais */
-body {
-    font-family: sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
-}
-
-.container {
-    max-width: 960px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-h1, h2, h3 {
-    color: #2c3e50;
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-    font-weight: bold;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="date"],
-input[type="tel"],
-input[type="number"],
-select {
-    width: calc(100% - 12px);
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-button {
-    background-color: #5cb85c;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #4cae4c;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.link-cadastro, .link-login {
-    margin-top: 10px;
-    font-size: 0.9em;
-}
-
-.link-cadastro a, .link-login a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-.link-cadastro a:hover, .link-login a:hover {
-    text-decoration: underline;
-}
-
-/* Estilos do cabeçalho */
-header {
-    background-color: #333;
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-header div {
-    font-size: 1.5em;
-    font-weight: bold;
-}
-
-header nav a {
-    color: white;
-    text-decoration: none;
-    margin-left: 20px;
-    padding: 8px 10px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-header nav a:hover,
-header nav a.active {
-    background-color: #555;
-}
-
-header nav button {
-    background-color: #d9534f;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1em;
-    margin-left: 20px;
-    transition: background-color 0.3s ease;
-}
-
-header nav button:hover {
-    background-color: #c9302c;
-}
-
-/* Estilos da página inicial */
-.pagina-inicial {
-    text-align: center;
-    padding: 40px 20px;
-}
-
-.pagina-inicial h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
-}
-
-.pagina-inicial p {
-    font-size: 1.1em;
-    color: #666;
-    margin-bottom: 30px;
-}
-
-.pagina-inicial .auth-buttons button {
-    margin: 0 10px;
-}
-
-/* Estilos dos containers de autenticação */
-.login-container,
-.cadastro-inicial-container,
-.cadastro-revendedor-container,
-.cadastro-loja-container {
-    max-width: 400px;
-    margin: 30px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.cadastro-inicial-container h2 {
-    margin-bottom: 20px;
-}
-
-.cadastro-options {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.cadastro-options button {
-    flex-grow: 1;
-}
-
-/* Estilos da lista de produtos */
-.produto-lista {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.produto-item {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    text-align: center;
-}
-
-.produto-item img {
-    max-width: 100%;
-    height: auto;
-    margin-bottom: 10px;
-    border-radius: 4px;
-}
-
-.produto-item h3 {
-    font-size: 1.2em;
-    margin-bottom: 5px;
-}
-
-.produto-item .preco {
-    color: #5cb85c;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-/* Estilos dos filtros */
-.filtros {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-    align-items: center;
-}
-
-.filtros label {
-    font-weight: normal;
-}
-
-/* Estilos dos detalhes do produto */
-.detalhes-produto {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #f9f9f9;
-    border-radius: 4px;
-    border: 1px solid #eee;
-    text-align: left;
-}
-
-.detalhes-produto h2 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
-}
-
-.detalhes-produto h3 {
-    font-size: 1.3em;
-    margin-bottom: 8px;
-}
-
-
-
-
-
-.detalhes-produto p {
-    color: #575353;
-    line-height: 1.6;
-    margin-bottom: 10px;
-}
-
-/* Estilos do rodapé */
-.rodape {
-    text-align: center;
-    padding: 20px;
-    background-color: #333;
-    color: white;
-    font-size: 0.9em;
-    position: sticky;
-    bottom: 0;
-    width: 100%;
-}
-</style>
