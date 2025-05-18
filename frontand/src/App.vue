@@ -84,6 +84,7 @@ const estaNaPaginaDeAutenticacao = computed(() => {
     return mostrarLoginModal.value || mostrarCadastroInicialModal.value || mostrarCadastroRevendedorModal.value || mostrarCadastroLojaModal.value || estaNaPaginaInicial.value;
 });
 
+
 watch(paginaAtual, (novaPagina) => {
     if (usuarioLogado.value) {
         estaNaPaginaInicial.value = false;
@@ -208,64 +209,111 @@ function login() {
     }
 }
 
-function cadastrarRevendedor() {
-    console.log('Cadastro de Revendedor:', {
-        nome: revendedorNome.value,
-        cidade: revendedorCidade.value,
-        estado: revendedorEstado.value,
-        email: revendedorEmail.value,
-        senha: revendedorSenha.value, // Senha do revendedor
-        cpf: revendedorCpf.value,
-        telefoneCelular: revendedorTelefoneCelular.value,
-        dataNascimento: revendedorDataNascimento.value,
-        cep: revendedorCep.value,
-        rua: revendedorRua.value,
-        numeroCasa: revendedorNumeroCasa.value,
-        complemento: revendedorComplemento.value,
-        bairro: revendedorBairro.value,
-        idLoja: revendedorIdLoja.value,
-    });
-    alert('Cadastro de revendedor realizado com sucesso! Faça login.');
-    mostrarCadastroRevendedorModal.value = false;
-    mostrarLoginModal.value = true;
-    // Limpar os campos do formulário de revendedor
-    revendedorNome.value = '';
-    revendedorCidade.value = '';
-    revendedorEstado.value = '';
-    revendedorEmail.value = '';
-    revendedorSenha.value = '';
-    revendedorCpf.value = '';
-    revendedorTelefoneCelular.value = '';
-    revendedorDataNascimento.value = '';
-    revendedorCep.value = '';
-    revendedorRua.value = '';
-    revendedorNumeroCasa.value = '';
-    revendedorComplemento.value = '';
-    revendedorBairro.value = '';
-    revendedorIdLoja.value = '';
+async function cadastrarRevendedor() {
+    console.log("Função cadastrarRevendedor chamada");
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/revendedores", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                nome: revendedorNome.value,
+                cidade: revendedorCidade.value,
+                estado: revendedorEstado.value,
+                email: revendedorEmail.value,
+                senha: revendedorSenha.value,
+                cpf: revendedorCpf.value,
+                telefone: revendedorTelefoneCelular.value,
+                data_nascimento: revendedorDataNascimento.value,
+                cep: revendedorCep.value,
+                rua: revendedorRua.value,
+                numero_casa: Number(revendedorNumeroCasa.value),
+                complemento: revendedorComplemento.value,
+                bairro: revendedorBairro.value,
+                fk_loja_id: Number(revendedorIdLoja.value)
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Erro ao cadastrar revendedor");
+        }
+
+        const data = await response.json();
+        alert("Revendedor cadastrado com sucesso!");
+        console.log(data);
+
+        // Limpa o formulário
+        revendedorNome.value = '';
+        revendedorCidade.value = '';
+        revendedorEstado.value = '';
+        revendedorEmail.value = '';
+        revendedorSenha.value = '';
+        revendedorCpf.value = '';
+        revendedorTelefoneCelular.value = '';
+        revendedorDataNascimento.value = '';
+        revendedorCep.value = '';
+        revendedorRua.value = '';
+        revendedorNumeroCasa.value = '';
+        revendedorComplemento.value = '';
+        revendedorBairro.value = '';
+        revendedorIdLoja.value = '';
+
+        mostrarCadastroRevendedorModal.value = false;
+        mostrarLoginModal.value = true;
+
+    } catch (error) {
+        alert(`Erro: ${error.message}`);
+    }
 }
 
-function cadastrarLoja() {
-    console.log('Cadastro de Loja:', {
-        cep: lojaCep.value,
-        cnpj: lojaCnpj.value,
-        nomeFantasia: lojaNomeFantasia.value,
-        razaoSocial: lojaRazaoSocial.value,
-        telefone: lojaTelefone.value,
-        email: lojaEmail.value,
-        senha: lojaSenha.value, // Senha da loja
-    });
-    alert('Cadastro de loja realizado com sucesso! Faça login.');
-    mostrarCadastroLojaModal.value = false;
-    mostrarLoginModal.value = true;
-    // Limpar os campos do formulário de loja
-    lojaCep.value = '';
-    lojaCnpj.value = '';
-    lojaNomeFantasia.value = '';
-    lojaRazaoSocial.value = '';
-    lojaTelefone.value = '';
-    lojaEmail.value = '';
-    lojaSenha.value = '';
+
+async function cadastrarLoja() {
+    console.log("Função cadastrarLoja chamada");
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/lojas", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                cep: lojaCep.value,
+                cnpj: lojaCnpj.value,
+                nome_fantasia: lojaNomeFantasia.value,
+                razao_social: lojaRazaoSocial.value,
+                telefone: lojaTelefone.value,
+                email: lojaEmail.value,
+                senha: lojaSenha.value
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Erro ao cadastrar loja");
+        }
+
+        const data = await response.json();
+        alert("Loja cadastrada com sucesso!");
+        console.log(data);
+
+        // Limpa os campos do formulário
+        lojaCep.value = '';
+        lojaCnpj.value = '';
+        lojaNomeFantasia.value = '';
+        lojaRazaoSocial.value = '';
+        lojaTelefone.value = '';
+        lojaEmail.value = '';
+        lojaSenha.value = '';
+
+        mostrarCadastroLojaModal.value = false;
+        mostrarLoginModal.value = true;
+
+    } catch (error) {
+        alert(`Erro: ${error.message}`);
+    }
 }
 
 function logout() {
@@ -344,6 +392,8 @@ onMounted(() => {
     }
 });
 </script>
+
+<div id="app"></div>
 
 <template>
     <header v-if="!estaNaPaginaInicial && usuarioLogado">
@@ -469,6 +519,8 @@ onMounted(() => {
             </div>
         </form>
     </section>
+
+            
 
     <section v-if="mostrarCadastroLojaModal" class="cadastro-loja-container">
         <h2>Cadastro de Loja</h2>
