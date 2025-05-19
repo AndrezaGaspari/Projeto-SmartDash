@@ -32,3 +32,16 @@ def deletar_revendedor(db: Session, rev_id: int):
         db.commit()
         return revendedor
     return None
+
+import bcrypt
+
+def verificar_login(db: Session, nome: str, senha: str):
+    usuario = db.query(models.Revendedor).filter(models.Revendedor.nome == nome).first()
+
+    if not usuario:
+        return None
+
+    if not bcrypt.checkpw(senha.encode('utf-8'), models.Revendedor.senha('utf-8')):
+        return None
+
+    return usuario

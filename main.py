@@ -7,6 +7,8 @@ from cruds import CadastroRevendedor,CarrinhoProdutos
 from cruds import CadastroProdutos
 from cruds import CadastroLojas
 from fastapi.middleware.cors import CORSMiddleware
+from banco_de_dados.schemas import LoginRevendedor
+
 
 app = FastAPI()
 
@@ -65,6 +67,13 @@ def deletar_revendedor(rev_id: int, db: Session = Depends(get_db)):
     if rev is None:
         raise HTTPException(status_code=404, detail="Revendedor não encontrado")
     return rev
+
+@app.post("/login")
+def login(dados: schemas.RevendedorBase, db: Session = Depends(get_db)):
+    usuario = CadastroRevendedor.verificar_login(db, dados.nome, dados.senha)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Usuário ou senha incorretos")
+    return True 
 
 # ------------------- ROTAS DO CARRINHO -------------------
 

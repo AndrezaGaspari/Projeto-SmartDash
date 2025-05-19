@@ -65,6 +65,10 @@ class Revendedor(RevendedorBase):
     class Config:
         from_attributes = True
 
+class LoginRevendedor(BaseModel):
+    email: str
+    senha: str
+    
 # Pedido
 class PedidoBase(BaseModel):
     valor_pedido: float
