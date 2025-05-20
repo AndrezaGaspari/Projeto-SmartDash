@@ -191,24 +191,6 @@ function mostrarCadastroLoja() {
     mostrarCadastroLojaModal.value = true;
 }
 
-function login() {
-    // Login de teste
-    if (loginEmail.value === 'teste' && loginSenha.value === 'teste') {
-        usuarioLogado.value = true;
-        loginEmail.value = '';
-        loginSenha.value = '';
-        return;
-    }
-
-    if (loginEmail.value === 'teste@email.com' && loginSenha.value === '123456') {
-        usuarioLogado.value = true;
-        loginEmail.value = '';
-        loginSenha.value = '';
-    } else {
-        alert('Credenciais inválidas.');
-    }
-}
-
 async function cadastrarRevendedor() {
     console.log("Função cadastrarRevendedor chamada");
 
@@ -232,7 +214,7 @@ async function cadastrarRevendedor() {
                 numero_casa: Number(revendedorNumeroCasa.value),
                 complemento: revendedorComplemento.value,
                 bairro: revendedorBairro.value,
-                fk_loja_id: Number(revendedorIdLoja.value)
+                fk_loja_id: Number(1)
             })
         });
 
@@ -289,6 +271,7 @@ async function cadastrarLoja() {
                 senha: lojaSenha.value
             })
         });
+        
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -315,6 +298,40 @@ async function cadastrarLoja() {
         alert(`Erro: ${error.message}`);
     }
 }
+// Função de login
+async function login() {
+  try {
+    const response = await fetch('http://localhost:8000/revendedores/login', {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: loginEmail.value,
+        senha: loginSenha.value,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response) {
+      alert(data.mensagem);
+      usuarioLogado.value = true
+      localStorage.setItem('usuarioLogado', 'true');
+      alert("foi")
+    } else {
+      alert(data.erro || 'Erro no login');
+      alert("deu ruim")
+    }
+  } catch (error) {
+    console.error('Erro na requisição de login:', error);
+    alert('Erro ao conectar com o servidor.');
+  }
+}
+
+
+
+
 
 function logout() {
     usuarioLogado.value = false;
@@ -508,10 +525,6 @@ onMounted(() => {
                 <input type="text" id="revendedorBairro" v-model="revendedorBairro" required>
             </div>
             <div class="form-group">
-                <label for="revendedorIdLoja">ID da Loja:</label>
-                <input type="text" id="revendedorIdLoja" v-model="revendedorIdLoja">
-            </div>
-            <div class="form-group">
                 <button type="submit">Cadastrar como Revendedor</button>
             </div>
             <div class="link-cadastro">
@@ -520,7 +533,6 @@ onMounted(() => {
         </form>
     </section>
 
-            
 
     <section v-if="mostrarCadastroLojaModal" class="cadastro-loja-container">
         <h2>Cadastro de Loja</h2>
