@@ -1,0 +1,637 @@
+/* src/assets/main.css (Seu novo arquivo main.css unificado) */
+
+@import './base.css'; /* Importa os estilos e variáveis do base.css */
+
+/* Paleta de Cores Loja Agrícola - Adaptada para evitar redundância com base.css e o novo código */
+:root {
+    /* Use cores mais específicas da sua aplicação ou sobrescreva as do base.css se necessário */
+    --cor-principal: #558B2F; /* Verde Oliva */
+    --cor-secundaria: #A0522D; /* Marrom Terra */
+    --cor-fundo-claro: #F5F5DC; /* Bege Claro */
+    --cor-texto-principal: #333;
+    --cor-texto-secundario: #777;
+    --cor-borda: #D3D3D3; /* Cinza Claro */
+    --cor-destaque: #FFA000; /* Amarelo Ouro (para alertas/ações importantes) */
+}
+
+/* Estilos Globais e de Layout (do seu código inicial e do main.css anterior) */
+
+/* #app - Mantido para o layout central da aplicação */
+#app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50; /* Pode ser sobrescrito por --cor-texto-principal */
+}
+
+/* Body - Consolidado. O background-color do seu código inicial será usado */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4; /* Do seu código inicial */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Do main.css anterior */
+    color: var(--cor-texto-principal); /* Do main.css anterior */
+    line-height: 1.6;
+}
+
+/* Header - Consolidado, priorizando as cores e tamanhos do seu código inicial */
+header {
+    background-color: #4CAF50; /* Do seu código inicial */
+    color: white;
+    padding: 1rem; /* Do seu código inicial */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* margin-bottom foi definido no main.css anterior, mas pode ser removido se não for universal */
+}
+
+header div {
+    font-size: 1.5rem; /* Do seu código inicial */
+    font-weight: bold;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 1rem; /* Do seu código inicial */
+    font-size: 1rem; /* Do seu código inicial */
+    transition: color 0.3s ease;
+    /* padding e border-radius do main.css anterior foram omitidos para manter o estilo do código inicial */
+}
+
+header nav a:hover,
+header nav a.active {
+    color: #e0e0e0; /* Do seu código inicial */
+    text-decoration: underline;
+    /* background-color do main.css anterior foi omitido */
+}
+
+header button {
+    background-color: #f44336; /* Do seu código inicial */
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem; /* Do seu código inicial */
+    border-radius: 5px; /* Do seu código inicial */
+    cursor: pointer;
+    font-size: 1rem; /* Do seu código inicial */
+    transition: background-color 0.3s ease;
+    /* margin-left e box-shadow do main.css anterior foram omitidos */
+}
+
+header button:hover {
+    background-color: #d32f2f; /* Do seu código inicial */
+}
+
+/* Páginas e Componentes Específicos */
+
+.pagina-inicial {
+    padding: 50px 20px;
+    text-align: center;
+    background-color: #e8f5e9; /* Do seu código inicial */
+    min-height: calc(100vh - 70px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* border-radius do main.css anterior foi omitido */
+}
+
+.pagina-inicial h1 {
+    font-size: 2.5rem; /* Do seu código inicial */
+    color: #2e7d32; /* Do seu código inicial */
+    margin-bottom: 20px;
+    /* font-size 3em e margin-bottom 25px do main.css anterior foram sobrescritos */
+}
+
+.pagina-inicial p {
+    font-size: 1.2rem; /* Do seu código inicial */
+    color: #555; /* Do seu código inicial */
+    margin-bottom: 30px;
+    /* font-size 1.2em e margin-bottom 40px do main.css anterior foram sobrescritos */
+}
+
+.auth-buttons button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin: 0 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* margin 0 15px e padding 15px 25px do main.css anterior foram sobrescritos */
+}
+
+.auth-buttons button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+.container {
+    padding: 20px; /* Do seu código inicial */
+    max-width: 1200px;
+    margin: 20px auto; /* Do seu código inicial */
+    background-color: white;
+    border-radius: 8px; /* Do seu código inicial */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Do seu código inicial */
+    /* Outras propriedades do container do main.css anterior foram sobrescritas ou omitidas */
+}
+
+.container h1 {
+    color: #333; /* Do seu código inicial */
+    margin-bottom: 20px;
+    /* Color var(--cor-principal) do main.css anterior foi sobrescrito */
+}
+
+.container p {
+    color: #666;
+    line-height: 1.6;
+}
+
+.container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.container li {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.container li button {
+    background-color: #ffcc80;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.container li button:hover {
+    background-color: #ffcc80;
+}
+
+.filtros {
+    display: flex; /* Do seu código inicial */
+    flex-wrap: wrap;
+    gap: 15px; /* Do seu código inicial */
+    margin-bottom: 30px;
+    padding: 15px; /* Do seu código inicial */
+    background-color: #e8f5e9; /* Do seu código inicial */
+    border-radius: 8px; /* Do seu código inicial */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    align-items: center;
+    /* Propriedades do main.css anterior como grid, border e padding 20px foram sobrescritos/omitidos */
+}
+
+.filtros label {
+    font-weight: bold; /* Do seu código inicial */
+    color: #333; /* Do seu código inicial */
+    /* font-weight normal do main.css anterior foi sobrescrito */
+}
+
+.filtros select,
+.filtros input[type="number"] {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filtros select:focus,
+.filtros input[type="number"]:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    outline: none;
+}
+
+.produto-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Do seu código inicial */
+    gap: 25px; /* Do seu código inicial */
+    /* minmax(300px, 1fr) e gap 25px do main.css anterior foram sobrescritos */
+    margin-top: 30px;
+}
+
+.produto-item {
+    background-color: #ffffff; /* Do seu código inicial */
+    border: 1px solid #e0e0e0; /* Do seu código inicial */
+    border-radius: 10px; /* Do seu código inicial */
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Do seu código inicial */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Propriedades do main.css anterior como border-radius 12px e box-shadow mais forte foram sobrescritas */
+}
+
+.produto-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.produto-item img {
+    max-width: 100%;
+    height: 150px; /* Do seu código inicial */
+    object-fit: contain;
+    border-radius: 5px; /* Do seu código inicial */
+    margin-bottom: 15px;
+    /* height: auto do main.css anterior foi sobrescrito */
+}
+
+.produto-item h3 {
+    font-size: 1.3rem; /* Do seu código inicial */
+    color: #333; /* Do seu código inicial */
+    margin-bottom: 10px;
+    height: 3em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* font-size 1.3em e color var(--cor-principal) do main.css anterior foram sobrescritos */
+}
+
+.produto-item .preco {
+    font-size: 1.2rem; /* Do seu código inicial */
+    color: #4CAF50; /* Do seu código inicial */
+    font-weight: bold;
+    margin-bottom: 15px;
+    /* font-size 1.1em e color var(--cor-destaque) do main.css anterior foram sobrescritos */
+}
+
+.produto-item button {
+    background-color: #2e7d32; /* Do seu código inicial */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem; /* Do seu código inicial */
+    margin: 5px;
+    transition: background-color 0.3s ease;
+    /* font-size 0.95em do main.css anterior foi sobrescrito */
+}
+
+.produto-item button:hover {
+    background-color: #ffcc80;
+}
+
+.produto-item button:last-child {
+    background-color: #f0ad4e; /* Cor para o botão de detalhes/editar */
+}
+
+.produto-item button:last-child:hover {
+    background-color: #ec971f;
+}
+
+/* Meu Pedido */
+.meu-pedido {
+    margin-top: 40px; /* Do seu código inicial */
+    padding: 25px;
+    background-color: #f0f8ff; /* Do seu código inicial */
+    border: 1px solid #b3e5fc; /* Do seu código inicial */
+    border-radius: 8px; /* Do seu código inicial */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* Do seu código inicial */
+    /* Propriedades do main.css anterior foram sobrescritas ou omitidas */
+}
+
+.meu-pedido h2 {
+    color: #0288d1; /* Do seu código inicial */
+    margin-bottom: 15px;
+    /* font-size 1.5em e color var(--cor-principal) do main.css anterior foram sobrescritos */
+}
+
+.meu-pedido ul {
+    list-style: disc inside; /* Do seu código inicial */
+    margin-bottom: 20px;
+    padding-left: 30px;
+}
+
+.meu-pedido li {
+    background-color: transparent; /* Do seu código inicial */
+    border: none; /* Do seu código inicial */
+    padding: 5px 0; /* Do seu código inicial */
+    margin-bottom: 5px;
+}
+
+.meu-pedido button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.meu-pedido button:hover {
+    background-color: #218838;
+}
+
+/* Detalhes Produto/Pedido */
+.detalhes-produto,
+.detalhes-pedido {
+    margin-top: 30px;
+    padding: 25px;
+    background-color: #e3f2fd; /* Do seu código inicial */
+    border: 1px solid #90caf9; /* Do seu código inicial */
+    border-radius: 8px; /* Do seu código inicial */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* Do seu código inicial */
+    text-align: left;
+    /* Propriedades do main.css anterior foram sobrescritas ou omitidas */
+}
+
+.detalhes-produto h2,
+.detalhes-pedido h2 {
+    color: #1565c0; /* Do seu código inicial */
+    margin-bottom: 15px;
+    /* font-size 1.8em e color var(--cor-principal) do main.css anterior foram sobrescritos */
+}
+
+.detalhes-produto h3 {
+    color: #3f51b5; /* Do seu código inicial */
+    margin-bottom: 10px;
+    /* font-size 1.5em e color var(--cor-secundaria) do main.css anterior foram sobrescritos */
+}
+
+.detalhes-produto p,
+.detalhes-pedido p {
+    margin-bottom: 8px; /* Do seu código inicial */
+    /* line-height 1.8 do main.css anterior foi sobrescrito */
+}
+
+/* Containers de Autenticação (Login, Cadastro) */
+.login-container,
+.cadastro-inicial-container,
+.cadastro-revendedor-container,
+.cadastro-loja-container {
+    max-width: 500px;
+    margin: 50px auto; /* Do seu código inicial */
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 10px; /* Do seu código inicial */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Do seu código inicial */
+    text-align: center;
+    /* Propriedades do main.css anterior foram sobrescritas ou omitidas */
+}
+
+.login-container h2,
+.cadastro-inicial-container h2,
+.cadastro-revendedor-container h2,
+.cadastro-loja-container h2 {
+    color: #333; /* Do seu código inicial */
+    margin-bottom: 25px;
+    font-size: 1.8rem; /* Do seu código inicial */
+    /* margin-bottom 30px do main.css anterior para cadastro-inicial-container foi sobrescrito */
+}
+
+.form-group {
+    margin-bottom: 18px; /* Do seu código inicial */
+    text-align: left;
+    /* margin-bottom 20px do main.css anterior foi sobrescrito */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555; /* Do seu código inicial */
+    font-weight: bold;
+    /* color var(--cor-texto-secundario) do main.css anterior foi sobrescrito */
+}
+
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group textarea,
+.form-group select {
+    width: calc(100% - 22px); /* Do seu código inicial */
+    padding: 12px; /* Do seu código inicial */
+    border: 1px solid #ccc; /* Do seu código inicial */
+    border-radius: 6px;
+    font-size: 1rem; /* Do seu código inicial */
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+    /* width calc(100% - 16px), padding 10px e border 1px solid var(--cor-borda) do main.css anterior foram sobrescritos */
+}
+
+.form-group input[type="email"]:focus,
+.form-group input[type="password"]:focus,
+.form-group input[type="text"]:focus,
+.form-group input[type="tel"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="number"]:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.form-group button {
+    width: 100%; /* Do seu código inicial */
+    padding: 12px; /* Do seu código inicial */
+    background-color: #4CAF50; /* Do seu código inicial */
+    color: white;
+    border: none;
+    border-radius: 6px; /* Do seu código inicial */
+    cursor: pointer;
+    font-size: 1.1rem; /* Do seu código inicial */
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    /* width auto, padding 12px 20px, border-radius 8px, font-size 1.1em do main.css anterior foram sobrescritos */
+}
+
+.form-group button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    /* background-color var(--cor-secundaria) do main.css anterior foi sobrescrito */
+}
+
+.link-cadastro, .link-login {
+    margin-top: 20px; /* Do seu código inicial */
+    font-size: 0.95rem; /* Do seu código inicial */
+    /* margin-top 15px e font-size 0.95em do main.css anterior foram sobrescritos */
+}
+
+.link-cadastro a, .link-login a {
+    color: #007bff; /* Do seu código inicial */
+    text-decoration: none;
+    transition: color 0.3s ease;
+    /* color var(--cor-principal) e font-weight bold do main.css anterior foram sobrescritos */
+}
+
+.link-cadastro a:hover,
+.link-login a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.cadastro-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.cadastro-options button {
+    background-color: #2196F3; /* Do seu código inicial */
+    color: white;
+    padding: 12px 25px; /* Do seu código inicial */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem; /* Do seu código inicial */
+    margin: 0 10px; /* Do seu código inicial */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* flex-grow 1 e font-size 1em do main.css anterior foram sobrescritos */
+}
+
+.cadastro-options button:hover {
+    background-color: #1976D2;
+    transform: translateY(-2px);
+}
+
+.form-cadastro-produto {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.form-cadastro-produto .form-group {
+    margin-bottom: 15px;
+}
+
+.form-cadastro-produto .form-group label {
+    font-weight: bold;
+    color: #444;
+}
+
+.form-cadastro-produto button[type="submit"] {
+    background-color: #28a745;
+    width: auto;
+    padding: 10px 20px;
+    margin-top: 20px;
+}
+
+.form-cadastro-produto button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.checkbox-group label {
+    margin: 0;
+    font-weight: normal;
+}
+
+/* Editar Produto */
+.editar-produto {
+    margin-top: 30px;
+    padding: 25px;
+    background-color: #fff3e0; /* Do seu código inicial */
+    border: 1px solid #ffcc80; /* Do seu código inicial */
+    border-radius: 8px; /* Do seu código inicial */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* Do seu código inicial */
+    text-align: left;
+    /* Propriedades do main.css anterior foram sobrescritas ou omitidas */
+}
+
+.editar-produto h2 {
+    color: #fb8c00; /* Do seu código inicial */
+    margin-bottom: 20px;
+    /* font-size 1.5em e color var(--cor-principal) do main.css anterior foram sobrescritos */
+}
+
+.editar-produto .form-group {
+    margin-bottom: 15px;
+}
+
+.editar-produto button {
+    background-color: #4CAF50; /* Do seu código inicial */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.editar-produto button:hover {
+    background-color: #45a049;
+}
+
+.editar-produto button:last-child {
+    background-color: #dc3545; /* Cor para o botão Cancelar */
+}
+
+.editar-produto button:last-child:hover {
+    background-color: #c82333;
+}
+
+/* Métricas (do seu main.css anterior) */
+.metricas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.metricas div {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    border: 1px solid var(--cor-borda);
+}
+
+.metricas h3 {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    color: var(--cor-secundaria);
+}
+
+.metricas ul, .metricas ol {
+    padding-left: 30px;
+}
+
+/* Rodapé (do seu main.css anterior) */
+.rodape {
+    text-align: center;
+    padding: 25px;
+    background-color: var(--cor-principal);
+    color: white;
+    font-size: 0.9em;
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}

@@ -1,28 +1,31 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from banco_de_dados.database import Engine, Base, SessionLocal
-from banco_de_dados import schemas 
-from cruds import CadastroRevendedor,CarrinhoProdutos
-from cruds import CadastroProdutos
-from cruds import CadastroLojas
-from fastapi.middleware.cors import CORSMiddleware
+from banco_de_dados import schemas
+from cruds import CadastroRevendedor, CarrinhoProdutos, CadastroProdutos, CadastroLojas
+from fastapi.middleware.cors import CORSMiddleware # Certifique-se desta importação
 from banco_de_dados.schemas import LoginRevendedor
 
 
 app = FastAPI()
 
-
-# Middleware de CORS
-
-from fastapi.middleware.cors import CORSMiddleware
+# --- SEÇÃO DE CONFIGURAÇÃO CORS ---
+origins = [
+    "http://localhost:5173",  # ONDE SEU FRONTEND VUE ESTÁ RODANDO
+    "http://127.0.0.1:5173",  # E ESTA TAMBÉM É IMPORTANTE
+    "http://localhost:8080",  # Se você usa Vue CLI em vez de Vite, pode ser 8080
+    "http://127.0.0.1:8080",
+    # Adicione outras origens se necessário, por exemplo, o domínio de produção
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ou ["http://127.0.0.1:5500"]
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=origins,         # Use a lista de origens definida acima
+    allow_credentials=True,        # Permite cookies/cabeçalhos de autorização
+    allow_methods=["*"],           # Permite todos os métodos (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],           # Permite todos os cabeçalhos
 )
+# --- FIM DA SEÇÃO DE CONFIGURAÇÃO CORS ---
 
 
 # Cria tabelas no banco de dados
@@ -35,7 +38,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
 # ------------------- ROTAS DE REVENDEDORES -------------------
 
 @app.post("/revendedores", response_model=schemas.Revendedor)
@@ -68,11 +70,11 @@ def deletar_revendedor(rev_id: int, db: Session = Depends(get_db)):
     return rev
 
 @app.post("/login")
-def login(dados: schemas.RevendedorBase, db: Session = Depends(get_db)):
-    usuario = CadastroRevendedor.verificar_login(db, dados.nome, dados.senha)
-    if usuario == None:
+def login(dados: LoginRevendedor, db: Session = Depends(get_db)):
+    usuario = CadastroRevendedor.verificar_login(db, dados.email, dados.senha)
+    if usuario is None:
         raise HTTPException(status_code=401, detail="Usuário ou senha incorretos")
-    return True 
+    return True
 
 
 

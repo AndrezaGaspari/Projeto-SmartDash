@@ -1,9 +1,20 @@
 from sqlalchemy.orm import Session
 from banco_de_dados import models, schemas
-
+import bcrypt
 # CRUD Revendedor
 def criar_revendedor(db: Session, revendedor: schemas.RevendedorCreate):
-    db_revendedor = models.Revendedor(**revendedor.dict())
+    # Crie um dicionário mutável a partir dos dados do revendedor
+    revendedor_data = revendedor.dict()
+
+    # Hashear a senha antes de criar o objeto do modelo
+    # Gera um salt (parte aleatória para o hash) e hasheia a senha
+    hashed_password_bytes = bcrypt.hashpw(revendedor_data["senha"].encode('utf-8'), bcrypt.gensalt(rounds=12))
+    # Decodifica o hash de bytes para string para salvar no banco de dados
+    revendedor_data["senha"] = hashed_password_bytes.decode('utf-8')
+
+    # Cria o objeto do modelo Revendedor com a senha hashed
+    db_revendedor = models.Revendedor(**revendedor_data)
+
     db.add(db_revendedor)
     db.commit()
     db.refresh(db_revendedor)
@@ -35,13 +46,11 @@ def deletar_revendedor(db: Session, rev_id: int):
 
 import bcrypt
 
-def verificar_login(db: Session, nome: str, senha: str):
-    usuario = db.query(models.Revendedor).filter(models.Revendedor.nome == nome).first()
-
+def verificar_login(db: Session, email: str, senha: str):
+    usuario = db.query(models.Revendedor).filter(models.Revendedor.email == email).first()
     if not usuario:
         return None
-
-    if not bcrypt.checkpw(senha.encode('utf-8'), models.Revendedor.senha('utf-8')):
+    # Verifique a senha
+    if not bcrypt.checkpw(senha.encode('utf-8'), usuario.senha.encode('utf-8')):
         return None
-
     return usuario
