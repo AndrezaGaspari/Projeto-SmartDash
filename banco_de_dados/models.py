@@ -38,16 +38,6 @@ class Produto(Base):
     pedidos = relationship("Pedido", secondary=relacionamento_pedido_produto, back_populates="produtos")
 
 
-
-class Item(Base):
-    __tablename__ = "item"
-    id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String)
-    descricao = Column(String)
-    valor_produto = Column(Float)
-    categoria = Column(String)
-    fk_loja_id = Column(Integer, ForeignKey("loja.id"))
-
 class Revendedor(Base):
     __tablename__ = "revendedor"
     id = Column(Integer, primary_key=True, index=True)
@@ -69,6 +59,7 @@ class Revendedor(Base):
     loja = relationship("Loja", back_populates="revendedores")
     pedidos = relationship("Pedido", back_populates="revendedor")
 
+
 class Pedido(Base):
     __tablename__ = "pedido"
     id = Column(Integer, primary_key=True, index=True)
@@ -80,4 +71,14 @@ class Pedido(Base):
 
     revendedor = relationship("Revendedor", back_populates="pedidos")
     produtos = relationship("Produto", secondary=relacionamento_pedido_produto, back_populates="pedidos")
-    
+
+class CarrinhoProduto(Base):
+    __tablename__ = "carrinho_produto"
+
+    id = Column(Integer, primary_key=True, index=True)
+    revendedor_id = Column("fk_revendedor_id", Integer, ForeignKey("revendedor.id"))
+    produto_id = Column("fk_produto_id", Integer, ForeignKey("produto.id"))
+    quantidade = Column(Integer, nullable=False)
+
+    produto = relationship("Produto")
+    revendedor = relationship("Revendedor")

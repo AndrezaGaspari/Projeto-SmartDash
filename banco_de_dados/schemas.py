@@ -87,18 +87,47 @@ class Pedido(PedidoBase):
     class Config:
         from_attributes = True
 
-#item
-class ItemBase(BaseModel):
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import date
+
+# Produto
+class ProdutoBase(BaseModel):
     nome: str
     descricao: str
+    vencimento: Optional[date] = None
+    quantidade: int
+    fabricacao: Optional[date] = None
     valor_produto: float
     categoria: str
     fk_loja_id: int
 
-class ItemCreate(ItemBase):
+class ProdutoCreate(ProdutoBase):
     pass
 
-class Item(ItemBase):
+class Produto(ProdutoBase):
     id: int
+
     class Config:
         from_attributes = True
+
+
+
+
+# Carrinho
+class CarrinhoProdutoBase(BaseModel):
+    produto_id: int
+    revendedor_id: int
+    quantidade: int
+
+
+class CarrinhoProdutoCreate(CarrinhoProdutoBase):
+    pass
+
+
+class CarrinhoProduto(CarrinhoProdutoBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+

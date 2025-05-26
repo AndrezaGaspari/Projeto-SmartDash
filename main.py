@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from banco_de_dados.database import Engine, Base, SessionLocal
-from banco_de_dados import schemas #temporariamente até ativar o crud.py
-#from banco_de_dados import schemas
+from banco_de_dados import schemas 
 from cruds import CadastroRevendedor,CarrinhoProdutos
 from cruds import CadastroProdutos
 from cruds import CadastroLojas
@@ -71,37 +70,10 @@ def deletar_revendedor(rev_id: int, db: Session = Depends(get_db)):
 @app.post("/login")
 def login(dados: schemas.RevendedorBase, db: Session = Depends(get_db)):
     usuario = CadastroRevendedor.verificar_login(db, dados.nome, dados.senha)
-    if not usuario:
+    if usuario == None:
         raise HTTPException(status_code=401, detail="Usuário ou senha incorretos")
     return True 
 
-# ------------------- ROTAS DO CARRINHO -------------------
-
-'''@app.get("/carrinho", response_model=schemas.Pedido)
-def lista_carrinho(db: Session = Depends(get_db)):
-    return CarrinhoProdutos.listar_carrinho
-
-
-@app.post("/carrinho", response_model=schemas.Pedido)
-def criar_carrinho(pedido: schemas.PedidoCreate, db: Session = Depends(get_db)):
-    return CarrinhoProdutos.criar_carrinho(db,pedido)
-
-
-@app.put("/carrinho/{rev_id}", response_model=schemas.Pedido)
-def atualizar_carrinho(rev_id = int, db: Session = Depends(get_db), revendedor = schemas.RevendedorCreates):
-    rev = CarrinhoProdutos.atualizar_carrinho(rev_id, db, revendedor)
-    if rev is None:
-        raise HTTPException(status_code=404, detail="Revendedor não encontrado")
-    return rev
-
-@app.delete("/carrinho/{rev_id}", response_model=schemas.Pedido)
-def atualizar_carrinho(rev_id = int, db: Session = Depends(get_db)):
-    rev = CadastroRevendedor.deletar_Carrinho(db, rev_id)
-    if rev is None:
-        raise HTTPException(status_code=404, detail="Revendedor não encontrado")
-    return rev'''
-
-# ------------------- ROTAS DE PRODUTOS -------------------
 
 
 @app.post("/produtos", response_model=schemas.Produto)
@@ -166,3 +138,26 @@ def deletar_loja(loj_id: int, db: Session = Depends(get_db)):
     if loj is None:
         raise HTTPException(status_code=404, detail="Loja não encontradao")
     return loj
+
+@app.post("/", response_model=schemas.CarrinhoProduto)
+def adicionar_produto(item: schemas.CarrinhoProdutoCreate, db: Session = Depends(get_db)):
+    return CarrinhoProdutos.adicionar_Produto_carrinho(db, item)
+
+
+@app.get("/carrinho/{revendedor_id}", response_model=list[schemas.CarrinhoProduto])
+def listar_itens(revendedor_id: int, db: Session = Depends(get_db)):
+    return CarrinhoProdutos.listar_Produto_carrinho(db, revendedor_id)
+
+@app.delete("/carrinho/item/{revendedor_id}/{produto_id}")
+def remover_item_path(revendedor_id: int, produto_id: int, db: Session = Depends(get_db)):
+    sucesso = CarrinhoProdutos.remover_Produto_carrinho(db, revendedor_id, produto_id)
+    if not sucesso:
+        raise HTTPException(status_code=404, detail="Item não encontrado")
+    return {"detail": "Item removido com sucesso"}
+
+
+
+@app.delete("/carrinho/limpar/{revendedor_id}")
+def limpar_carrinho(revendedor_id: int, db: Session = Depends(get_db)):
+    CarrinhoProdutos.limpar_carrinho(db, revendedor_id)
+    return {"detail": "Carrinho limpo com sucesso"}
