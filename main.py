@@ -9,7 +9,6 @@ from banco_de_dados.schemas import LoginRevendedor
 
 app = FastAPI()
 
-# --- SEÇÃO DE CONFIGURAÇÃO CORS ---
 origins = [
     "http://localhost:5173",  # ONDE SEU FRONTEND VUE ESTÁ RODANDO
     "http://127.0.0.1:5173",  # E ESTA TAMBÉM É IMPORTANTE
@@ -38,7 +37,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
 # ------------------- ROTAS DE REVENDEDORES -------------------
+
 
 @app.post("/revendedores", response_model=schemas.Revendedor)
 def criar_revendedor(revendedor: schemas.RevendedorCreate, db: Session = Depends(get_db)):
@@ -69,6 +71,10 @@ def deletar_revendedor(rev_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Revendedor não encontrado")
     return rev
 
+
+# ------------------- ROTAS DO LOGIN -------------------
+
+
 @app.post("/login")
 def login(dados: LoginRevendedor, db: Session = Depends(get_db)):
     usuario = CadastroRevendedor.verificar_login(db, dados.email, dados.senha)
@@ -77,11 +83,12 @@ def login(dados: LoginRevendedor, db: Session = Depends(get_db)):
     return True
 
 
+# ------------------- ROTAS DOS PRODUTOS -------------------
+
 
 @app.post("/produtos", response_model=schemas.Produto)
 def criar_produto(produto: schemas.ProdutoCreate, db: Session = Depends(get_db)):
     return CadastroProdutos.criar_produto(db, produto)
-
 
 @app.get("/produtos", response_model=list[schemas.Produto])
 def listar_produtos(db: Session = Depends(get_db)):
@@ -141,6 +148,9 @@ def deletar_loja(loj_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Loja não encontradao")
     return loj
 
+
+# ------------------- ROTAS DO CARRINHO -------------------
+
 @app.post("/", response_model=schemas.CarrinhoProduto)
 def adicionar_produto(item: schemas.CarrinhoProdutoCreate, db: Session = Depends(get_db)):
     return CarrinhoProdutos.adicionar_Produto_carrinho(db, item)
@@ -156,7 +166,6 @@ def remover_item_path(revendedor_id: int, produto_id: int, db: Session = Depends
     if not sucesso:
         raise HTTPException(status_code=404, detail="Item não encontrado")
     return {"detail": "Item removido com sucesso"}
-
 
 
 @app.delete("/carrinho/limpar/{revendedor_id}")
