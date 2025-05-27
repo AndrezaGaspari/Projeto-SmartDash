@@ -183,6 +183,14 @@ watch(usuarioLogado, (novoStatus) => {
     }
 });
 
+//ve
+watch(paginaAtual, (novaPagina) => {
+    if (novaPagina === 'produtos') {
+        carregarProdutos();
+    }
+});
+
+
 function mostrarLogin() {
     estaNaPaginaInicial.value = false;
     mostrarLoginModal.value = true;
@@ -346,34 +354,65 @@ async function login() {
     }
 }
 // Nova função para cadastrar produto
-function cadastrarProduto() {
-    if (!novoProdutoNome.value || !novoProdutoCategoria.value || !novoProdutoPreco.value) {
-        alert('Por favor, preencha nome, categoria e preço do produto.');
-        return;
+async function cadastrarProduto() {
+    try {
+        const produto = {
+            nome: novoProdutoNome.value,
+            descricao: novoProdutoDescricao.value,
+            categoria: novoProdutoCategoria.value,
+            valor_produto: parseFloat(novoProdutoPreco.value),
+            quantidade: novoProdutoDisponivel.value ? 1 : 0,
+            vencimento: null, // Se quiser adicionar, coloque um campo de data
+            fabricacao: null, // Idem
+            fk_loja_id: 1, // Substitua pelo ID da loja do usuário logado
+        };
+
+        const resposta = await fetch('http://localhost:8000/produtos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(produto),
+        });
+
+        if (!resposta.ok) {
+            const erro = await resposta.json();
+            throw new Error(erro.detail || 'Erro ao cadastrar produto');
+        }
+
+        const dados = await resposta.json();
+        alert('Produto cadastrado com sucesso!');
+
+        // Limpa os campos após cadastro
+        novoProdutoNome.value = '';
+        novoProdutoDescricao.value = '';
+        novoProdutoCategoria.value = '';
+        novoProdutoPreco.value = null;
+        novoProdutoDisponivel.value = true;
+        novoProdutoImagem.value = '';
+
+        // Volta para a tela de produtos
+        paginaAtual.value = 'produtos';
+
+    } catch (erro) {
+        console.error('Erro ao cadastrar produto:', erro);
+        alert('Erro ao cadastrar produto: ' + erro.message);
     }
-
-    const novoId = produtos.value.length > 0 ? Math.max(...produtos.value.map(p => p.id)) + 1 : 1;
-    produtos.value.push({
-        id: novoId,
-        nome: novoProdutoNome.value,
-        descricao: novoProdutoDescricao.value,
-        categoria: novoProdutoCategoria.value,
-        preco: parseFloat(novoProdutoPreco.value),
-        disponivel: novoProdutoDisponivel.value,
-        imagem: novoProdutoImagem.value || logoImg // Usa a imagem fornecida ou uma padrão
-    });
-
-    alert('Produto cadastrado com sucesso!');
-    // Limpa os campos do formulário
-    novoProdutoNome.value = '';
-    novoProdutoDescricao.value = '';
-    novoProdutoCategoria.value = '';
-    novoProdutoPreco.value = null;
-    novoProdutoDisponivel.value = true;
-    novoProdutoImagem.value = '';
-
-    navegarPara('produtos'); // Volta para a lista de produtos após o cadastro
 }
+
+//carrega os produtos quando da F5
+const carregarProdutos = async () => {
+    try {
+        const resposta = await fetch('http://localhost:8000/produtos');
+        if (!resposta.ok) {
+            throw new Error('Erro ao buscar produtos');
+        }
+        const dados = await resposta.json();
+        produtos.value = dados;
+    } catch (erro) {
+        console.error('Erro ao carregar produtos:', erro);
+    }
+};
 
 
 function logout() {
