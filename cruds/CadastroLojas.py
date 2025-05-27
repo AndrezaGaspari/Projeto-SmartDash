@@ -27,6 +27,11 @@ def atualizar_lojas(db: Session, loj_id: int, novo: schemas.LojaCreate):
         return loja
     return None
 
+def verificar_login_loja(db: Session, email: str, senha: str):
+  
+    loja = db.query(models.Loja).filter(models.Loja.email == email, models.Loja.senha == senha).first()
+    return loja 
+
 def deletar_loja(db: Session, loj_id: int):
     loja = buscar_lojas(db, loj_id)
     if loja:

@@ -22,24 +22,36 @@ class Produto(ProdutoBase):
     class Config:
         from_attributes = True
 
-# Loja
+# schemas.py
+from pydantic import BaseModel, EmailStr, Field # Importe Field e EmailStr
+from typing import Optional # Importe Optional se usar campos opcionais
+
 class LojaBase(BaseModel):
-    nome: str
+    
+    nome_fantasia: str
+    razao_social: str
+    cnpj: str 
+    senha: str 
     estado: str
     cidade: str
-    cnpj: str
-    senha: str  
+    email: EmailStr
+    cep: str                      # <--- NOVO CAMPO ADICIONADO (assumindo que é obrigatório)
+    telefone: Optional[str] = None # <--- NOVO CAMPO ADICIONADO (assumindo que é opcional)
+
 
 class LojaCreate(LojaBase):
-    pass
+    pass 
 
 class Loja(LojaBase):
-    id: int
-
+    id: int 
+ 
     class Config:
-        from_attributes = True
+        from_attributes = True 
 
-# Revendedor
+class LoginLoja(BaseModel):
+    email: EmailStr
+    senha: str
+
 class RevendedorBase(BaseModel):
     nome: str
     cidade: str
@@ -113,12 +125,15 @@ class Produto(ProdutoBase):
 
 
 
-
 # Carrinho
+from pydantic import BaseModel
+
 class CarrinhoProdutoBase(BaseModel):
     produto_id: int
     revendedor_id: int
     quantidade: int
+    nome_produto: str         
+    preco_unitario: float    
 
 
 class CarrinhoProdutoCreate(CarrinhoProdutoBase):

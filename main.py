@@ -4,7 +4,7 @@ from banco_de_dados.database import Engine, Base, SessionLocal
 from banco_de_dados import schemas
 from cruds import CadastroRevendedor, CarrinhoProdutos, CadastroProdutos, CadastroLojas
 from fastapi.middleware.cors import CORSMiddleware # Certifique-se desta importação
-from banco_de_dados.schemas import LoginRevendedor
+from banco_de_dados.schemas import LoginRevendedor , LoginLoja
 
 
 app = FastAPI()
@@ -110,7 +110,6 @@ def deletar_produto(prod_id: int, db: Session = Depends(get_db)):
 
 # ------------------- ROTAS DE LOJAS -------------------
 
-
 @app.post("/lojas", response_model=schemas.Loja)
 def criar_loja(loja: schemas.LojaCreate, db: Session = Depends(get_db)):
     return CadastroLojas.criar_loja(db, loja)
@@ -140,6 +139,21 @@ def deletar_loja(loj_id: int, db: Session = Depends(get_db)):
     if loj is None:
         raise HTTPException(status_code=404, detail="Loja não encontradao")
     return loj
+
+# NOVO: Endpoint para login de lojas
+@app.post("/lojas/login") # <--- NOVO ENDPOINT DE LOGIN PARA LOJAS
+def login_loja(dados: LoginLoja, db: Session = Depends(get_db)):
+    loja = CadastroLojas.verificar_login_loja(db, dados.email, dados.senha)
+    if loja is None:
+        raise HTTPException(status_code=401, detail="Email ou senha incorretos para a loja")
+    # Retorna dados úteis para o frontend
+    return {"message": "Login de loja bem-sucedido!", "id": loja.id, "email": loja.email, "nome_fantasia": loja.nome_fantasia}
+
+
+
+
+
+
 
 @app.post("/", response_model=schemas.CarrinhoProduto)
 def adicionar_produto(item: schemas.CarrinhoProdutoCreate, db: Session = Depends(get_db)):

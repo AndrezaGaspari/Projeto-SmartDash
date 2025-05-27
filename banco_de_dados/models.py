@@ -13,11 +13,16 @@ relacionamento_pedido_produto = Table(
 class Loja(Base):
     __tablename__ = "loja"
     id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String)
-    estado = Column(String)
-    cidade = Column(String)
+    # Campos que o frontend está enviando:
+    nome_fantasia = Column(String) # Novo campo
+    razao_social = Column(String)  # Novo campo
     cnpj = Column(String)
     senha = Column(String)
+    estado = Column(String)
+    cidade = Column(String)
+    email = Column(String) # Novo campo
+    cep = Column(String)       # <--- NOVO CAMPO ADICIONADO
+    telefone = Column(String)  # <--- NOVO CAMPO ADICIONADO
 
     produtos = relationship("Produto", back_populates="loja")
     revendedores = relationship("Revendedor", back_populates="loja")
