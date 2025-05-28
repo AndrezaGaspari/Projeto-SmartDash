@@ -38,7 +38,9 @@ class Produto(Base):
     valor_produto = Column(Float)
     categoria = Column(String)
     fk_loja_id = Column(Integer, ForeignKey("loja.id"))
-
+    imagem = Column(String, nullable=True) # Campo para a URL da imagem (String)
+    disponivel = Column(Boolean, default=True) # Adicione esta linha com um valor padrão
+    
     loja = relationship("Loja", back_populates="produtos")
     pedidos = relationship("Pedido", secondary=relacionamento_pedido_produto, back_populates="produtos")
 

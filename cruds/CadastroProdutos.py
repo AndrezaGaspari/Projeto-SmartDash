@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Session
-from banco_de_dados import models, schemas
+from sqlalchemy.orm import Session # Isso é para o type hint (db: Session)
+from banco_de_dados import models, schemas # Certifique-se que estas estão corretas
 
 # CRUD Produto
 

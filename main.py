@@ -1,11 +1,16 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form # Importe UploadFile, File e Form
 from sqlalchemy.orm import Session
 from banco_de_dados.database import Engine, Base, SessionLocal
 from banco_de_dados import schemas
 from cruds import CadastroRevendedor, CarrinhoProdutos, CadastroProdutos, CadastroLojas
-from fastapi.middleware.cors import CORSMiddleware # Certifique-se desta importação
+from fastapi.middleware.cors import CORSMiddleware
 from banco_de_dados.schemas import LoginRevendedor , LoginLoja
 
+# Para servir arquivos estáticos (imagens)
+from fastapi.staticfiles import StaticFiles
+import os # Para lidar com caminhos de arquivo
+from typing import Optional # Para campos opcionais
+from datetime import date # Para campos de data
 
 app = FastAPI()
 
@@ -20,15 +25,25 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,         # Use a lista de origens definida acima
-    allow_credentials=True,        # Permite cookies/cabeçalhos de autorização
-    allow_methods=["*"],           # Permite todos os métodos (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],           # Permite todos os cabeçalhos
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 # --- FIM DA SEÇÃO DE CONFIGURAÇÃO CORS ---
 
+# --- Configuração para servir arquivos estáticos (imagens) ---
+# Crie esta pasta na raiz do seu projeto FastAPI se ela não existir
+UPLOAD_DIRECTORY = "./static/images"
+if not os.path.exists(UPLOAD_DIRECTORY):
+    os.makedirs(UPLOAD_DIRECTORY)
 
-# Cria tabelas no banco de dados
+# Monta o diretório 'static' para ser acessível via '/static' na URL
+app.mount("/static", StaticFiles(directory="static"), name="static")
+# --- FIM DA CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS ---
+
+
+# Cria tabelas no banco de dados (apenas para desenvolvimento, use migrações em produção)
 Base.metadata.create_all(bind=Engine)
 
 # Dependência para obter sessão do banco
@@ -38,6 +53,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 # ------------------- ROTAS DE REVENDEDORES -------------------
 
 @app.post("/revendedores", response_model=schemas.Revendedor)
@@ -74,13 +90,68 @@ def login(dados: LoginRevendedor, db: Session = Depends(get_db)):
     usuario = CadastroRevendedor.verificar_login(db, dados.email, dados.senha)
     if usuario is None:
         raise HTTPException(status_code=401, detail="Usuário ou senha incorretos")
-    return True
+    # Retorna o ID do revendedor para o frontend
+    return {"message": "Login de revendedor bem-sucedido!", "id": usuario.id, "email": usuario.email, "nome": usuario.nome}
 
 
+# ------------------- ROTAS DE PRODUTOS (AJUSTADAS PARA UPLOAD DE IMAGEM) -------------------
 
-@app.post("/produtos", response_model=schemas.Produto)
-def criar_produto(produto: schemas.ProdutoCreate, db: Session = Depends(get_db)):
-    return CadastroProdutos.criar_produto(db, produto)
+@app.post("/produtos", response_model=schemas.Produto, status_code=status.HTTP_201_CREATED)
+async def criar_produto( # Função agora é assíncrona para lidar com I/O de arquivo
+    nome: str = Form(...),
+    descricao: str = Form(...),
+    categoria: str = Form(...),
+    valor_produto: float = Form(...),
+    quantidade: int = Form(...),
+    vencimento: Optional[date] = Form(None), # Use Form(None) para campos opcionais
+    fabricacao: Optional[date] = Form(None), # Use Form(None) para campos opcionais
+    disponivel: bool = Form(True), # Use Form(True) para valores padrão
+    fk_loja_id: int = Form(...),
+    imagem: Optional[UploadFile] = File(None), # <<< Recebe o arquivo da imagem
+    db: Session = Depends(get_db)
+):
+    image_url = None
+    if imagem:
+        # Gera um nome de arquivo único para evitar colisões
+        import uuid
+        file_extension = os.path.splitext(imagem.filename)[1] # Pega a extensão (.jpg, .png)
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        file_path = os.path.join(UPLOAD_DIRECTORY, unique_filename)
+
+        # Salva o arquivo no diretório de uploads
+        try:
+            with open(file_path, "wb") as buffer:
+                # Lê o arquivo em pedaços para lidar com arquivos grandes
+                while contents := await imagem.read(1024 * 1024): # Lê em blocos de 1MB
+                    buffer.write(contents)
+            
+            # Define a URL que será salva no banco e retornada para o frontend
+            image_url = f"/static/images/{unique_filename}"
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erro ao salvar imagem: {e}")
+
+    # Cria o produto no banco de dados.
+    # Note que agora passamos os parâmetros individualmente, não um schema.ProdutoCreate
+    # diretamente, pois o UploadFile e Form são tratados separadamente.
+    db_produto_data = {
+        "nome": nome,
+        "descricao": descricao,
+        "categoria": categoria,
+        "valor_produto": valor_produto,
+        "quantidade": quantidade,
+        "vencimento": vencimento,
+        "fabricacao": fabricacao,
+        "imagem": image_url, # <<< A URL da imagem salva
+        "disponivel": disponivel,
+        "fk_loja_id": fk_loja_id
+    }
+    
+    # Cria uma instância do schema ProdutoCreate para validar os dados
+    # Isso é opcional, mas garante que os dados estejam no formato correto antes de passar para o CRUD
+    produto_schema_instance = schemas.ProdutoCreate(**db_produto_data)
+
+    # Chama a função de CRUD, que agora deve aceitar um schema.ProdutoCreate
+    return CadastroProdutos.criar_produto(db, produto_schema_instance)
 
 
 @app.get("/produtos", response_model=list[schemas.Produto])
@@ -130,7 +201,7 @@ def buscar_loja(loj_id: int, db: Session = Depends(get_db)):
 def atualizar_loja(loj_id: int, loja: schemas.LojaCreate, db: Session = Depends(get_db)):
     loj = CadastroLojas.atualizar_lojas(db, loj_id, loja)
     if loj is None:
-        raise HTTPException(status_code=404, detail="Loja não encontrada")
+        raise HTTPException(status_code=404, detail="Loja não encontradao")
     return loj
 
 @app.delete("/lojas/{loj_id}", response_model=schemas.Loja)
@@ -141,39 +212,38 @@ def deletar_loja(loj_id: int, db: Session = Depends(get_db)):
     return loj
 
 # NOVO: Endpoint para login de lojas
-@app.post("/lojas/login") # <--- NOVO ENDPOINT DE LOGIN PARA LOJAS
+@app.post("/lojas/login")
 def login_loja(dados: LoginLoja, db: Session = Depends(get_db)):
     loja = CadastroLojas.verificar_login_loja(db, dados.email, dados.senha)
     if loja is None:
         raise HTTPException(status_code=401, detail="Email ou senha incorretos para a loja")
-    # Retorna dados úteis para o frontend
     return {"message": "Login de loja bem-sucedido!", "id": loja.id, "email": loja.email, "nome_fantasia": loja.nome_fantasia}
 
 
+# ------------------- ROTAS DE CARRINHO -------------------
 
-
-
-
-
-@app.post("/", response_model=schemas.CarrinhoProduto)
-def adicionar_produto(item: schemas.CarrinhoProdutoCreate, db: Session = Depends(get_db)):
+@app.post("/carrinho/adicionar", response_model=schemas.CarrinhoProduto, status_code=status.HTTP_201_CREATED)
+def adicionar_produto_carrinho(item: schemas.CarrinhoProdutoCreate, db: Session = Depends(get_db)):
+    # Ajustei o nome da rota para ser mais descritivo
     return CarrinhoProdutos.adicionar_Produto_carrinho(db, item)
 
 
 @app.get("/carrinho/{revendedor_id}", response_model=list[schemas.CarrinhoProduto])
-def listar_itens(revendedor_id: int, db: Session = Depends(get_db)):
+def listar_itens_carrinho(revendedor_id: int, db: Session = Depends(get_db)):
+    # Ajustei o nome da rota para ser mais descritivo
     return CarrinhoProdutos.listar_Produto_carrinho(db, revendedor_id)
 
 @app.delete("/carrinho/item/{revendedor_id}/{produto_id}")
-def remover_item_path(revendedor_id: int, produto_id: int, db: Session = Depends(get_db)):
+def remover_item_carrinho(revendedor_id: int, produto_id: int, db: Session = Depends(get_db)):
+    # Ajustei o nome da rota para ser mais descritivo
     sucesso = CarrinhoProdutos.remover_Produto_carrinho(db, revendedor_id, produto_id)
     if not sucesso:
-        raise HTTPException(status_code=404, detail="Item não encontrado")
-    return {"detail": "Item removido com sucesso"}
-
+        raise HTTPException(status_code=404, detail="Item não encontrado no carrinho")
+    return {"detail": "Item removido com sucesso do carrinho"}
 
 
 @app.delete("/carrinho/limpar/{revendedor_id}")
-def limpar_carrinho(revendedor_id: int, db: Session = Depends(get_db)):
+def limpar_carrinho_completo(revendedor_id: int, db: Session = Depends(get_db)):
+    # Ajustei o nome da rota para ser mais descritivo
     CarrinhoProdutos.limpar_carrinho(db, revendedor_id)
     return {"detail": "Carrinho limpo com sucesso"}
