@@ -20,6 +20,7 @@ origins = [
     "http://127.0.0.1:5173",  # E ESTA TAMBÉM É IMPORTANTE
     "http://localhost:8080",  # Se você usa Vue CLI em vez de Vite, pode ser 8080
     "http://127.0.0.1:8080",
+    "http://127.0.0.1:8000"
     # Adicione outras origens se necessário, por exemplo, o domínio de produção
 ]
 
@@ -120,6 +121,9 @@ async def criar_produto( # Função agora é assíncrona para lidar com I/O de a
 
         # Salva o arquivo no diretório de uploads
         try:
+
+
+
             with open(file_path, "wb") as buffer:
                 # Lê o arquivo em pedaços para lidar com arquivos grandes
                 while contents := await imagem.read(1024 * 1024): # Lê em blocos de 1MB

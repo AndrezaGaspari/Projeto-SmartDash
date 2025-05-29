@@ -157,7 +157,7 @@ watch(usuarioLogado, (novoStatus) => {
 // **NOVA FUNÇÃO: FETCH PRODUTOS DO BACKEND**
 async function fetchProdutos() {
     try {
-        const response = await fetch('http://127.0.0.1:8000/produtos');
+        const response = await fetch('http://localhost:8000/produtos');
         if (!response.ok) {
             throw new Error('Erro ao carregar produtos do servidor.');
         }
@@ -174,7 +174,7 @@ async function fetchProdutos() {
 async function fetchCarrinho() {
     if (userRole.value === 'revendedor' && userId.value) {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/carrinho/${userId.value}`); // Endpoint para obter carrinho do revendedor
+            const response = await fetch(`http://localhost:8000/carrinho/${userId.value}`); // Endpoint para obter carrinho do revendedor
             if (!response.ok) {
                 // Se o carrinho estiver vazio ou não encontrado, o backend pode retornar 404
                 // Nesse caso, inicializamos o carrinho local como vazio
@@ -200,7 +200,7 @@ async function cadastrarRevendedor() {
     console.log("Função cadastrarRevendedor chamada");
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/revendedores", {
+        const response = await fetch("http://localhost:8000/revendedores", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -275,7 +275,7 @@ async function cadastrarLoja() {
     console.log("Payload enviado:", payload);
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/lojas", {
+        const response = await fetch("http://localhost:8000/lojas", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -457,7 +457,7 @@ async function cadastrarNovoProduto() {
 
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/produtos/', { // Endpoint POST do seu FastAPI
+        const response = await fetch('http://localhost:8000/produtos/', { // Endpoint POST do seu FastAPI
             method: 'POST',
             // *** MUDANÇA AQUI: REMOVA O CABEÇALHO 'Content-Type' MANUALMENTE ***
             // O navegador definirá automaticamente o Content-Type: multipart/form-data com a boundary correta
@@ -526,35 +526,37 @@ function navegarPara(pagina) {
             }
         }
     }
-}
-async function adicionarAoPedido(produto) {
-    console.log("DEBUG: userRole.value =", userRole.value);
-    console.log("DEBUG: userId.value =", userId.value);
+}async function adicionarAoPedido(produto) {
+    console.log("Botão 'Adicionar ao Pedido' clicado para o produto:", produto);
+    console.log("User ID:", userId.value, "User Role:", userRole.value);
 
-    if (userRole.value !== 'revendedor' || !userId.value) {
-        alert('Você precisa estar logado como revendedor para adicionar itens ao pedido.');
+    if (!userId.value || userRole.value !== 'revendedor') {
+        alert('Você precisa estar logado como revendedor para adicionar produtos ao pedido.');
         return;
     }
 
     const revendedorId = parseInt(userId.value);
     if (isNaN(revendedorId)) {
         alert('Erro: ID do revendedor inválido. Por favor, faça login novamente.');
-        console.error('userId.value não é um número válido:', userId.value);
         return;
     }
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/carrinho/', { // Endpoint para adicionar item ao carrinho
+        const response = await fetch('http://localhost:8000/carrinho/adicionar', { // Endpoint para adicionar item ao carrinho
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
+                // Opcional: Adicione o token de autorização aqui se o endpoint exigir!
+                // 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             },
             body: JSON.stringify({
-                revendedor_id: revendedorId,
-                produto_id: produto.id,
-                quantidade: 1, // Assumindo quantidade 1 ao adicionar
-                nome_produto: produto.nome,
-                preco_unitario: produto.preco // Ou produto.valor_produto, dependendo do que vem do backend
+                // ****** ATENÇÃO: AS MUDANÇAS SÃO AQUI ABAIXO ******
+                fk_revendedor_id: revendedorId, // <-- CORRIGIDO!
+                fk_produto_id: produto.id,     // <-- CORRIGIDO!
+                quantidade: 1,
+                // REMOVA as linhas abaixo, pois o schema CarrinhoProdutoCreate não as espera
+                // nome_produto: produto.nome,
+                // preco_unitario: produto.preco // Ou produto.valor_produto
             }),
         });
 
@@ -573,7 +575,6 @@ async function adicionarAoPedido(produto) {
         alert(`Erro ao adicionar ao pedido: ${error.message || error}`);
     }
 }
-
 async function enviarPedido() {
     if (pedidosRevendedor.value.length === 0) {
         alert('Seu pedido está vazio.');
@@ -603,10 +604,11 @@ async function enviarPedido() {
             }))
         };
 
-        const responseEnviarPedido = await fetch('http://127.0.0.1:8000/pedidos', { // Exemplo de endpoint para enviar pedido
+        const responseEnviarPedido = await fetch('http://localhost:8000/pedidos', { // Exemplo de endpoint para enviar pedido
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // <--- ADICIONE ESTA LINHA AQUI!
             },
             body: JSON.stringify(pedidoData),
         });
@@ -620,7 +622,7 @@ async function enviarPedido() {
         // Isso é opcional, dependendo de como seu backend gerencia o "envio" vs "limpeza".
         // Se o endpoint `/pedidos` já limpa o carrinho no backend, você não precisa desta segunda chamada.
         // Mas se precisa de uma chamada separada para limpar o carrinho:
-        const responseLimparCarrinho = await fetch(`http://127.0.0.1:8000/carrinho/${revendedorId}`, {
+        const responseLimparCarrinho = await fetch(`http://localhost:8000/carrinho/${revendedorId}`, {
             method: "DELETE", // Endpoint para limpar todo o carrinho de um revendedor
             headers: { 'Content-Type': 'application/json' },
         });
@@ -638,45 +640,32 @@ async function enviarPedido() {
         alert(`Erro ao enviar pedido: ${error.message}`);
     }
 }
-async function removerItemDoPedido(produtoId) {
-    if (userRole.value !== 'revendedor' || !userId.value) {
-        alert('Você precisa estar logado como revendedor para remover itens do pedido.');
-        return;
-    }
-
-    if (!confirm('Tem certeza que deseja remover este item do seu pedido?')) {
-        return;
-    }
-
-    const revendedorId = parseInt(userId.value);
-    if (isNaN(revendedorId)) {
-        alert('Erro: ID do revendedor inválido. Por favor, faça login novamente.');
-        return;
-    }
-
+// Este é o código COMPLETO e CORRETO para a função removerItemDoPedido
+async function removerItemDoPedido(itemId) {
+    console.log("Tentando remover item com ID:", itemId);
     try {
-        console.log(`Removendo produto ${produtoId} do carrinho do revendedor ${revendedorId}`);
-        // **CORREÇÃO DA URL DO ENDPOINT DELETE**
-        const response = await fetch(`http://127.0.0.1:8000/carrinho/${revendedorId}/item/${produtoId}`, {
+        const token = localStorage.getItem('accessToken');
+        // Usamos o itemId recebido como parâmetro da função
+        const response = await fetch(`http://localhost:8000/carrinho/remover/${itemId}`, {
             method: "DELETE",
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { // Adicione o header de Authorization aqui também!
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error("Erro detalhado do FastAPI (remover item do pedido):", errorData);
-            throw new Error(errorData.detail ? JSON.stringify(errorData.detail) : "Erro ao remover item do carrinho.");
+            console.error("Erro detalhado do FastAPI (remover item do carrinho):", errorData);
+            throw new Error(errorData.detail ? JSON.stringify(errorData.detail) : "Erro ao remover produto do carrinho.");
         }
 
-        alert('Item removido com sucesso!');
-        await fetchCarrinho(); // Atualiza a lista do carrinho após remover
+        alert('Produto removido do carrinho.');
+        await fetchCarrinho(); // Atualiza o carrinho após a remoção
     } catch (error) {
-        console.error('Erro ao remover item:', error);
-        alert(`Erro ao remover item: ${error.message}`);
+        console.error('Erro ao remover item do pedido:', error);
+        alert(`Erro ao remover do pedido: ${error.message || error}`);
     }
-}
+} 
 function selecionarProduto(produto) {
     produtoSelecionado.value = produto;
 }
@@ -747,7 +736,7 @@ async function salvarEdicaoProduto() {
     };
 
     try {
-        const response = await fetch(`http://127.0.0.1:8000/produtos/${produtoId}`, {
+        const response = await fetch(`http://localhost:8000/produtos/${produtoId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -792,7 +781,7 @@ async function deletarProduto(produtoId) {
     }
 
     try {
-        const response = await fetch(`http://127.0.0.1:8000/produtos/${produtoId}`, {
+        const response = await fetch(`http://localhost:8000/produtos/${produtoId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -835,7 +824,6 @@ onMounted(() => {
     }
 });
 </script>
-
 <template>
   <div id="app-container">
     <header class="app-header">
@@ -1203,13 +1191,19 @@ onMounted(() => {
               <p :class="{ disponivel: produto.disponivel, indisponivel: !produto.disponivel }">
                 {{ produto.disponivel ? "Disponível" : "Indisponível" }}
               </p>
-              <div class="product-actions">
+         <div class="product-actions">
                 <button
-                  v-if="userRole === 'revendedor' && produto.disponivel"
-                  @click="adicionarAoPedido(produto)"
+                    v-if="userRole === 'revendedor'"
+                    @click="adicionarAoPedido(produto)"
+                    :disabled="!produto.disponivel || produto.quantidade <= 0"
+                    class="add-to-cart-button"
                 >
-                  Adicionar ao Pedido
+                    Adicionar ao Pedido
                 </button>
+                <p v-if="produto.quantidade <= 0" class="out-of-stock-message">Fora de estoque</p>
+                <p v-if="!usuarioLogado || userRole !== 'revendedor'" class="login-prompt-message">
+                    Faça login como revendedor para adicionar ao carrinho.
+                </p>
                 <div v-if="isAdmin">
                   <button @click="iniciarEdicaoProduto(produto)">Editar</button>
                   <button @click="deletarProduto(produto.id)">Excluir</button>

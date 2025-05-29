@@ -79,12 +79,14 @@ class Pedido(Base):
     revendedor = relationship("Revendedor", back_populates="pedidos")
     produtos = relationship("Produto", secondary=relacionamento_pedido_produto, back_populates="pedidos")
 
+
 class CarrinhoProduto(Base):
     __tablename__ = "carrinho_produto"
 
     id = Column(Integer, primary_key=True, index=True)
-    revendedor_id = Column("fk_revendedor_id", Integer, ForeignKey("revendedor.id"))
-    produto_id = Column("fk_produto_id", Integer, ForeignKey("produto.id"))
+    # ****** MUDANÇA CRUCIAL AQUI: REMOVA O PRIMEIRO ARGUMENTO STRING ******
+    fk_revendedor_id = Column(Integer, ForeignKey("revendedor.id")) # <--- CORRIGIDO
+    fk_produto_id = Column(Integer, ForeignKey("produto.id"))     # <--- CORRIGIDO
     quantidade = Column(Integer, nullable=False)
 
     produto = relationship("Produto")
