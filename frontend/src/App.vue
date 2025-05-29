@@ -11,9 +11,9 @@ const userRole = ref(localStorage.getItem('userRole') || null);
 const userId = ref(localStorage.getItem('userId') || null);
 const estaNaPaginaInicial = ref(!usuarioLogado.value);
 const mostrarLoginModal = ref(false);
-const mostrarCadastroInicialModal = ref(false); // Nova modal para escolher o tipo de cadastro
-const mostrarCadastroRevendedorModal = ref(false); // Modal de cadastro para revendedor
-const mostrarCadastroLojaModal = ref(false); // Modal de cadastro para loja
+const mostrarCadastroInicialModal = ref(false); 
+const mostrarCadastroRevendedorModal = ref(false); 
+const mostrarCadastroLojaModal = ref(false); 
 const loginEmail = ref('');
 const loginSenha = ref('');
 const tipoLogin = ref('revendedor');
@@ -30,8 +30,8 @@ const revendedorRua = ref('');
 const revendedorNumeroCasa = ref('');
 const revendedorComplemento = ref('');
 const revendedorBairro = ref('');
-const revendedorIdLoja = ref(''); // Este campo pode não ser usado se a loja for dinâmica
-const revendedorSenha = ref(''); // Novo campo senha para revendedor
+const revendedorIdLoja = ref(''); 
+const revendedorSenha = ref(''); 
 
 // Campos do formulário de loja
 const lojaCep = ref('');
@@ -51,8 +51,8 @@ const entradaTexto = ref('');
 const entradaTexto2 = ref('');
 const lista = ref([]);
 const beneficios = ref(['Alta eficácia', 'Amplo espectro', 'Seguro para a cultura (se usado corretamente)']);
-// Remova os produtos de teste iniciais se você planeja carregar do backend
-const produtos = ref([]); // Inicialize como array vazio para carregar do backend
+
+const produtos = ref([]); /
 const filtroCategoria = ref('');
 const filtroPrecoMin = ref(null);
 const filtroPrecoMax = ref(null);
@@ -67,26 +67,23 @@ const pedidosAprovacao = ref([
 const produtoEditando = ref(null);
 const edicaoNome = ref('');
 const edicaoPreco = ref(null);
-// NOVAS REFS PARA EDIÇÃO DE PRODUTOS
 const edicaoDescricao = ref('');
 const edicaoCategoria = ref('');
 const edicaoDisponivel = ref(true);
 const edicaoImagem = ref('');
-// Nova ref para edição de quantidade (se você quiser editar a quantidade de um produto existente)
 const edicaoQuantidade = ref(null);
 
-
-// Novos campos para cadastro de produto
+const historicoPedidosRevendedor = ref([]);
 const novoProdutoNome = ref('');
 const novoProdutoDescricao = ref('');
 const novoProdutoCategoria = ref('');
 const novoProdutoPreco = ref(null);
 const novoProdutoDisponivel = ref(true);
-const novoProdutoQuantidade = ref(null); // **NOVA REF PARA QUANTIDADE**
-const novoProdutoVencimento = ref(''); // Para a data de vencimento
-const novoProdutoFabricacao = ref(''); // Para a data de fabricação
-const novoProdutoImagemFile = ref(null);      // Para armazenar o objeto File
-const novoProdutoImagemPreview = ref(null);   // Para a URL de pré-visualização da imagem
+const novoProdutoQuantidade = ref(null); 
+const novoProdutoVencimento = ref(''); 
+const novoProdutoFabricacao = ref(''); 
+const novoProdutoImagemFile = ref(null);     
+const novoProdutoImagemPreview = ref(null);   
 const produtosFiltrados = computed(() => {
     return produtos.value.filter(produto => {
         const categoriaOk = !filtroCategoria.value || produto.categoria.toLowerCase().includes(filtroCategoria.value.toLowerCase());
@@ -139,14 +136,14 @@ watch(usuarioLogado, (novoStatus) => {
 
         if (userRole.value === 'loja') {
             paginaAtual.value = 'dashboard';
-            fetchProdutos(); // Loja pode precisar carregar produtos ou outros dados
+            fetchProdutos(); 
         } else if (userRole.value === 'revendedor') {
             paginaAtual.value = 'produtos';
-            fetchProdutos(); // Revendedor deve carregar produtos
-            fetchCarrinho(); // Revendedor deve carregar o carrinho
+            fetchProdutos(); 
+            fetchCarrinho(); 
         } else {
             paginaAtual.value = 'produtos';
-            fetchProdutos(); // Fallback
+            fetchProdutos();
         }
     } else {
         paginaAtual.value = '';
@@ -154,7 +151,7 @@ watch(usuarioLogado, (novoStatus) => {
     }
 });
 
-// **NOVA FUNÇÃO: FETCH PRODUTOS DO BACKEND**
+
 async function fetchProdutos() {
     try {
         const response = await fetch('http://localhost:8000/produtos');
@@ -170,14 +167,13 @@ async function fetchProdutos() {
     }
 }
 
-// **NOVA FUNÇÃO: FETCH CARRINHO DO BACKEND**
+
 async function fetchCarrinho() {
     if (userRole.value === 'revendedor' && userId.value) {
         try {
             const response = await fetch(`http://localhost:8000/carrinho/${userId.value}`); // Endpoint para obter carrinho do revendedor
             if (!response.ok) {
-                // Se o carrinho estiver vazio ou não encontrado, o backend pode retornar 404
-                // Nesse caso, inicializamos o carrinho local como vazio
+          
                 if (response.status === 404) {
                     pedidosRevendedor.value = [];
                     console.log("Carrinho vazio para este revendedor.");
@@ -219,7 +215,7 @@ async function cadastrarRevendedor() {
                 numero_casa: Number(revendedorNumeroCasa.value),
                 complemento: revendedorComplemento.value,
                 bairro: revendedorBairro.value,
-                fk_loja_id: Number(1) // ATENÇÃO: fk_loja_id está fixo em 1. Mantenha isso em mente.
+                fk_loja_id: Number(1) 
             })
         });
 
@@ -353,7 +349,7 @@ async function loginRevendedor() {
     }
 }
 
-// NOVA FUNÇÃO: Login para Lojas
+//  Login para Lojas
 async function loginLoja() {
     console.log("Tentando login de loja...");
     try {
@@ -398,7 +394,7 @@ async function loginLoja() {
 function handleLoginSubmit() {
     if (tipoLogin.value === 'revendedor') {
         loginRevendedor();
-    } else { // tipoLogin.value === 'loja'
+    } else { 
         loginLoja();
     }
 }
@@ -406,7 +402,7 @@ function handleImageUpload(event) {
     const file = event.target.files[0];
     if (file) {
         novoProdutoImagemFile.value = file;
-        novoProdutoImagemPreview.value = URL.createObjectURL(file); // Cria URL para pré-visualização
+        novoProdutoImagemPreview.value = URL.createObjectURL(file); 
     } else {
         novoProdutoImagemFile.value = null;
         novoProdutoImagemPreview.value = null;
@@ -414,7 +410,7 @@ function handleImageUpload(event) {
 }
 
 // Função para cadastrar produto 
-// Função para cadastrar produto
+
 async function cadastrarNovoProduto() {
 
     if (!novoProdutoNome.value || !novoProdutoCategoria.value || novoProdutoPreco.value === null || novoProdutoQuantidade.value === null) {
@@ -433,7 +429,7 @@ async function cadastrarNovoProduto() {
         return;
     }
 
-    // *** MUDANÇA AQUI: Usar FormData para enviar dados mistos (texto + arquivo) ***
+
     const formData = new FormData();
     formData.append('nome', novoProdutoNome.value);
     formData.append('descricao', novoProdutoDescricao.value);
@@ -442,7 +438,7 @@ async function cadastrarNovoProduto() {
     formData.append('quantidade', parseInt(novoProdutoQuantidade.value));
     formData.append('fk_loja_id', lojaId); // fk_loja_id enviado
 
-    // Adicione campos opcionais apenas se tiverem valor
+
     if (novoProdutoVencimento.value) {
         formData.append('vencimento', novoProdutoVencimento.value);
     }
@@ -457,12 +453,10 @@ async function cadastrarNovoProduto() {
 
 
     try {
-        const response = await fetch('http://localhost:8000/produtos/', { // Endpoint POST do seu FastAPI
+        const response = await fetch('http://localhost:8000/produtos/', { // Endpoint POST do FastAPI
             method: 'POST',
-            // *** MUDANÇA AQUI: REMOVA O CABEÇALHO 'Content-Type' MANUALMENTE ***
-            // O navegador definirá automaticamente o Content-Type: multipart/form-data com a boundary correta
-            // headers: { 'Content-Type': 'application/json' }, // <-- REMOVA OU COMENTE ESTA LINHA!
-            body: formData, // *** MUDANÇA AQUI: Envie o objeto FormData ***
+
+            body: formData, 
         });
 
         if (!response.ok) {
@@ -495,7 +489,22 @@ async function cadastrarNovoProduto() {
         alert(`Erro ao cadastrar produto: ${error.message}`);
     }
 }
-
+async function fetchHistoricoPedidosRevendedor() {
+    if (userRole.value === 'revendedor' && userId.value) {
+        try {
+            const response = await fetch(`http://localhost:8000/pedidos/revendedor/${userId.value}`);
+            if (!response.ok) {
+                throw new Error('Erro ao carregar histórico de pedidos do servidor.');
+            }
+            const data = await response.json();
+            historicoPedidosRevendedor.value = data; 
+            console.log("Histórico de pedidos carregado:", data);
+        } catch (error) {
+            console.error('Erro ao buscar histórico de pedidos:', error);
+            alert(`Erro ao carregar histórico de pedidos: ${error.message}`);
+        }
+    }
+}
 function logout() {
     usuarioLogado.value = false;
     userRole.value = null;
@@ -524,7 +533,11 @@ function navegarPara(pagina) {
             if (userRole.value === 'revendedor') {
                 fetchCarrinho();
             }
+        } else if (pagina === 'pedidos' && userRole.value === 'revendedor') { 
+            fetchCarrinho(); // Para o carrinho atual
+          fetchHistoricoPedidosRevendedor(); // Para o histórico
         }
+        
     }
 }async function adicionarAoPedido(produto) {
     console.log("Botão 'Adicionar ao Pedido' clicado para o produto:", produto);
@@ -546,17 +559,14 @@ function navegarPara(pagina) {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
-                // Opcional: Adicione o token de autorização aqui se o endpoint exigir!
-                // 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+           
             },
             body: JSON.stringify({
-                // ****** ATENÇÃO: AS MUDANÇAS SÃO AQUI ABAIXO ******
-                fk_revendedor_id: revendedorId, // <-- CORRIGIDO!
-                fk_produto_id: produto.id,     // <-- CORRIGIDO!
+                
+                fk_revendedor_id: revendedorId, 
+                fk_produto_id: produto.id,   
                 quantidade: 1,
-                // REMOVA as linhas abaixo, pois o schema CarrinhoProdutoCreate não as espera
-                // nome_produto: produto.nome,
-                // preco_unitario: produto.preco // Ou produto.valor_produto
+                
             }),
         });
 
@@ -569,7 +579,7 @@ function navegarPara(pagina) {
         const data = await response.json();
         alert(`${produto.nome} adicionado ao pedido.`);
         console.log("Produto adicionado ao pedido:", data);
-        await fetchCarrinho(); // ATUALIZA O CARRINHO NO FRONTEND
+        await fetchCarrinho(); 
     } catch (error) {
         console.error('Erro ao adicionar ao pedido:', error);
         alert(`Erro ao adicionar ao pedido: ${error.message || error}`);
@@ -600,15 +610,15 @@ async function enviarPedido() {
             itens: pedidosRevendedor.value.map(item => ({
                 produto_id: item.produto_id,
                 quantidade: item.quantidade,
-                preco_unitario: item.preco_unitario // Ou `item.preco` se o backend o chama assim
+                preco_unitario: item.preco_unitario 
             }))
         };
 
-        const responseEnviarPedido = await fetch('http://localhost:8000/pedidos', { // Exemplo de endpoint para enviar pedido
+        const responseEnviarPedido = await fetch('http://localhost:8000/pedidos', { 
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // <--- ADICIONE ESTA LINHA AQUI!
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}` 
             },
             body: JSON.stringify(pedidoData),
         });
@@ -618,10 +628,6 @@ async function enviarPedido() {
             throw new Error(errorData.detail ? JSON.stringify(errorData.detail) : "Erro ao enviar o pedido para aprovação.");
         }
 
-        // 2. Após o envio bem-sucedido, limpar o carrinho no backend (se houver um endpoint para isso)
-        // Isso é opcional, dependendo de como seu backend gerencia o "envio" vs "limpeza".
-        // Se o endpoint `/pedidos` já limpa o carrinho no backend, você não precisa desta segunda chamada.
-        // Mas se precisa de uma chamada separada para limpar o carrinho:
         const responseLimparCarrinho = await fetch(`http://localhost:8000/carrinho/${revendedorId}`, {
             method: "DELETE", // Endpoint para limpar todo o carrinho de um revendedor
             headers: { 'Content-Type': 'application/json' },
@@ -633,14 +639,14 @@ async function enviarPedido() {
 
 
         alert('Pedido enviado para aprovação!');
-        pedidosRevendedor.value = []; // Limpa o frontend após sucesso
-        navegarPara('pedidos'); // Opcional: mantém na página de pedidos que agora estará vazia
+        pedidosRevendedor.value = []; 
+        navegarPara('pedidos'); 
     } catch (error) {
         console.error('Erro ao enviar pedido:', error);
         alert(`Erro ao enviar pedido: ${error.message}`);
     }
 }
-// Este é o código COMPLETO e CORRETO para a função removerItemDoPedido
+
 async function removerItemDoPedido(itemId) {
     console.log("Tentando remover item com ID:", itemId);
     try {
@@ -648,7 +654,7 @@ async function removerItemDoPedido(itemId) {
         // Usamos o itemId recebido como parâmetro da função
         const response = await fetch(`http://localhost:8000/carrinho/remover/${itemId}`, {
             method: "DELETE",
-            headers: { // Adicione o header de Authorization aqui também!
+            headers: { 
                 'Authorization': `Bearer ${token}`
             }
         });
@@ -692,12 +698,12 @@ function rejeitarPedido(pedidoId) {
 function iniciarEdicaoProduto(produto) {
     produtoEditando.value = produto;
     edicaoNome.value = produto.nome;
-    edicaoPreco.value = produto.valor_produto; // **USAR valor_produto, não preco**
+    edicaoPreco.value = produto.valor_produto; 
     edicaoDescricao.value = produto.descricao;
     edicaoCategoria.value = produto.categoria;
     edicaoDisponivel.value = produto.disponivel;
     edicaoImagem.value = produto.imagem;
-    edicaoQuantidade.value = produto.quantidade; // **NOVO: Carrega quantidade para edição**
+    edicaoQuantidade.value = produto.quantidade; 
 }
 
 // FUNÇÃO SALVAR EDIÇÃO PRODUTO ATUALIZADA - AGORA FAZ CHAMADA AO BACKEND
@@ -709,7 +715,7 @@ async function salvarEdicaoProduto() {
     // Validação para fk_loja_id: Apenas lojas podem editar produtos.
     if (userRole.value !== 'loja' || !userId.value) {
         alert('Você precisa estar logado como loja para editar produtos.');
-        cancelarEdicaoProduto(); // Cancela a edição
+        cancelarEdicaoProduto(); 
         return;
     }
     const lojaId = parseInt(userId.value);
@@ -726,10 +732,10 @@ async function salvarEdicaoProduto() {
         nome: edicaoNome.value,
         descricao: edicaoDescricao.value,
         categoria: edicaoCategoria.value,
-        valor_produto: parseFloat(edicaoPreco.value), // **AQUI: Mapeado de 'preco' para 'valor_produto'**
-        quantidade: parseInt(edicaoQuantidade.value), // **AQUI: Incluído quantidade**
-        vencimento: produtoEditando.value.vencimento, // Mantenha, se não houver campos de edição para ele
-        fabricacao: produtoEditando.value.fabricacao, // Mantenha, se não houver campos de edição para ele
+        valor_produto: parseFloat(edicaoPreco.value), 
+        quantidade: parseInt(edicaoQuantidade.value), 
+        vencimento: produtoEditando.value.vencimento, 
+        fabricacao: produtoEditando.value.fabricacao, 
         fk_loja_id: lojaId, // Enviando o ID da loja logada
         imagem: edicaoImagem.value || '',
         disponivel: edicaoDisponivel.value,
@@ -754,10 +760,10 @@ async function salvarEdicaoProduto() {
         alert('Produto atualizado com sucesso!');
         console.log("Produto atualizado no backend:", data);
 
-        // Atualiza a lista local de produtos após o sucesso da API
-        await fetchProdutos(); // A melhor forma de garantir a sincronização
+        
+        await fetchProdutos(); 
 
-        produtoEditando.value = null; // Fecha o modal de edição
+        produtoEditando.value = null; 
     } catch (error) {
         console.error('Erro ao salvar edição do produto:', error);
         alert(`Erro ao salvar edição: ${error.message}`);
@@ -768,13 +774,13 @@ function cancelarEdicaoProduto() {
     produtoEditando.value = null;
 }
 
-// **NOVA FUNÇÃO: DELETAR PRODUTO (Faz chamada ao Backend)**
+
 async function deletarProduto(produtoId) {
     if (!confirm('Tem certeza que deseja deletar este produto? Esta ação é irreversível.')) {
         return;
     }
 
-    // Validação de permissão
+
     if (userRole.value !== 'loja' || !userId.value) {
         alert('Você precisa estar logado como loja para deletar produtos.');
         return;
@@ -1212,32 +1218,51 @@ onMounted(() => {
             </article>
           </div>
         </section>
+<section v-else-if="paginaAtual === 'pedidos' && userRole === 'revendedor'" class="my-orders-section container">
+    <h2>Meus Pedidos</h2>
 
-        <section v-else-if="paginaAtual === 'pedidos' && userRole === 'revendedor'" class="my-orders-section container">
-          <h2>Meus Pedidos</h2>
-          <ul v-if="pedidosRevendedor.length">
-            <li v-for="pedido in pedidosRevendedor" :key="pedido.id" class="order-item">
-              <div class="order-header">
-                <span>Pedido ID: {{ pedido.id }}</span>
-                <span :class="['order-status', pedido.status]">{{ pedido.status }}</span>
-              </div>
-              <ul class="order-items-list">
-                <li v-for="(item, index) in pedido.itens" :key="index">
-                  {{ item.nome }} (Quantidade: {{ item.quantidade }})
+    <h3 class="subsection-title">Carrinho Atual</h3>
+    <div v-if="pedidosRevendedor.length > 0" class="carrinho-itens-display">
+        <div v-for="item in pedidosRevendedor" :key="item.id" class="carrinho-item-card">
+            <img :src="item.produto ? item.produto.imagem : 'caminho/para/imagem_padrao.png'" :alt="item.produto ? item.produto.nome : 'Produto'" class="item-imagem" />
+            <div class="item-info">
+                <h4>{{ item.produto ? item.produto.nome : 'Produto Desconhecido' }}</h4>
+                <p>Quantidade: {{ item.quantidade }}</p> 
+                <p>Preço Unitário: R$ {{ (item.produto ? item.produto.valor_produto : item.preco_unitario || 0).toFixed(2) }}</p>
+                <p>Total Item: R$ {{ (item.quantidade * (item.produto ? item.produto.valor_produto : item.preco_unitario || 0)).toFixed(2) }}</p>
+                <button @click="removerItemDoPedido(item.id)" class="remove-item-button">Remover Item</button>
+            </div>
+        </div>
+        
+        <div class="cart-summary">
+            <p>Total do Carrinho: R$ {{ totalCarrinho.toFixed(2) }}</p> <button @click="enviarPedido" class="submit-order-button">
+                Enviar Pedido
+            </button>
+        </div>
+    </div>
+    <div v-else class="carrinho-vazio">
+        <p>Seu carrinho está vazio.</p>
+        <p>Adicione produtos na página de <a href="#" @click.prevent="navegarPara('produtos')">Produtos</a>.</p>
+    </div>
+
+    <hr class="section-divider"> <h3 class="subsection-title">Histórico de Pedidos Enviados</h3>
+    <div v-if="historicoPedidosRevendedor && historicoPedidosRevendedor.length > 0" class="order-history-display">
+        <div v-for="pedido in historicoPedidosRevendedor" :key="pedido.id" class="historical-order-card">
+            <h4>Pedido #{{ pedido.id }} - Status: {{ pedido.status || 'Pendente' }}</h4> <p>Data do Pedido: {{ new Date(pedido.data_pedido).toLocaleDateString() }}</p>
+            <p class="order-total">Total do Pedido: R$ {{ pedido.total ? pedido.total.toFixed(2) : 'N/A' }}</p>
+            <h4>Itens do Pedido:</h4>
+            <ul v-if="pedido.itens && pedido.itens.length > 0">
+                <li v-for="(itemPedido, index) in pedido.itens" :key="itemPedido.produto_id || index">
+                    {{ itemPedido.nome_produto || itemPedido.nome }} ({{ itemPedido.quantidade }}x) - R$ {{ (itemPedido.preco_unitario || itemPedido.preco || 0).toFixed(2) }}
                 </li>
-              </ul>
-            </li>
-          </ul>
-          <p v-else class="empty-state">Você não possui pedidos realizados ainda.</p>
-          <button
-            v-if="pedidosRevendedor.length > 0 && pedidosRevendedor.some((p) => p.status === 'pendente')"
-            @click="enviarPedido"
-            class="submit-order-button"
-          >
-            Enviar Pedido
-          </button>
-        </section>
-
+            </ul>
+            <p v-else>Nenhum item detalhado disponível para este pedido.</p>
+        </div>
+    </div>
+    <div v-else class="empty-history-message">
+        <p>Você ainda não tem pedidos enviados no histórico.</p>
+    </div>
+</section>
         <section v-else-if="paginaAtual === 'aprovacoes' && isAdmin" class="approvals-section container">
           <h2>Aprovação de Pedidos</h2>
           <ul v-if="pedidosAprovacao.length" class="approval-list">
@@ -1306,6 +1331,7 @@ onMounted(() => {
         required
       />
     </div>
+
 
     <div class="form-group">
       <label for="novoVencimento">Data de Vencimento:</label>
@@ -1387,6 +1413,6 @@ onMounted(() => {
 </template>
 
 <style>
-/* Importe seu main.css aqui */
+
 @import "./assets/main.css";
 </style>

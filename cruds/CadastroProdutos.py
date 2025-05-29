@@ -1,42 +1,40 @@
-from sqlalchemy.orm import Session # Isso é para o type hint (db: Session)
-from banco_de_dados import models, schemas # Certifique-se que estas estão corretas
+from sqlalchemy.orm import Session
+from banco_de_dados import models, schemas
 
-# CRUD Produto
-
-# No seu cruds/CadastroProdutos.py (APÓS RENOMEAR A COLUNA NO models.py)
+# Funções CRUD de Produto
 
 def criar_produto(db: Session, produto: schemas.ProdutoCreate):
-    # Isso agora vai funcionar, pois 'valor_produto' existirá no models.Produto
-    # e 'disponivel' e 'imagem' também serão incluídos se estiverem no schema.
-    db_produto = models.Produto(**produto.model_dump()) # Use .model_dump() para Pydantic v2+
+    # Cria um novo produto
+    db_produto = models.Produto(**produto.model_dump())
     db.add(db_produto)
     db.commit()
     db.refresh(db_produto)
     return db_produto
 
-def atualizar_produto(db: Session, prod_id: int, novo: schemas.ProdutoCreate):
-    produto_db = buscar_produto(db, prod_id) # Renomeado para evitar conflito com 'produto' no loop
-    if produto_db:
-        # Isso agora vai funcionar, pois 'valor_produto', 'disponivel', 'imagem'
-        # e outros campos do schema serão mapeados corretamente.
-        for key, value in novo.model_dump(exclude_unset=True).items(): # exclude_unset para atualizar apenas campos enviados
-            setattr(produto_db, key, value)
+def atualizar_produto(db: Session, prod_id: int, novos_dados: schemas.ProdutoCreate):
+    # Atualiza um produto existente
+    produto_no_db = buscar_produto(db, prod_id)
+    if produto_no_db:
+        for key, value in novos_dados.model_dump(exclude_unset=True).items():
+            setattr(produto_no_db, key, value)
         db.commit()
-        db.refresh(produto_db)
-        return produto_db
+        db.refresh(produto_no_db)
+        return produto_no_db
     return None
 
 def buscar_produto(db: Session, prod_id: int):
+    # Busca um produto pelo ID
     return db.query(models.Produto).filter(models.Produto.id == prod_id).first()
 
 def listar_produtos(db: Session):
+    # Lista todos os produtos
     return db.query(models.Produto).all()
 
-
 def deletar_produto(db: Session, prod_id: int):
-    produto = buscar_produto(db, prod_id)
-    if produto:
-        db.delete(produto)
+    # Deleta um produto
+    produto_para_deletar = buscar_produto(db, prod_id)
+    if produto_para_deletar:
+        db.delete(produto_para_deletar)
         db.commit()
-        return produto
+        return produto_para_deletar
     return None

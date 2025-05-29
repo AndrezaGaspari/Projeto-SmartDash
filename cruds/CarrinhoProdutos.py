@@ -1,18 +1,19 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from banco_de_dados import models, schemas
 
 def adicionar_Produto_carrinho(db: Session, item: schemas.CarrinhoProdutoCreate):
+    # Adiciona ou atualiza a quantidade de um produto no carrinho
     db_item = db.query(models.CarrinhoProduto).filter(
-        models.CarrinhoProduto.fk_produto_id == item.fk_produto_id,   # <--- CORRIGIDO
-        models.CarrinhoProduto.fk_revendedor_id == item.fk_revendedor_id # <--- CORRIGIDO
+        models.CarrinhoProduto.fk_produto_id == item.fk_produto_id,
+        models.CarrinhoProduto.fk_revendedor_id == item.fk_revendedor_id
     ).first()
 
     if db_item:
         db_item.quantidade += item.quantidade
     else:
         db_item = models.CarrinhoProduto(
-            fk_produto_id=item.fk_produto_id,    # <--- CORRIGIDO
-            fk_revendedor_id=item.fk_revendedor_id, # <--- CORRIGIDO
+            fk_produto_id=item.fk_produto_id,
+            fk_revendedor_id=item.fk_revendedor_id,
             quantidade=item.quantidade
         )
         db.add(db_item)
@@ -21,16 +22,17 @@ def adicionar_Produto_carrinho(db: Session, item: schemas.CarrinhoProdutoCreate)
     db.refresh(db_item)
     return db_item
 
-# Listar itens do models.carrinho por revendedor
 def listar_Produto_carrinho(db: Session, revendedor_id: int):
-    # Esta função parece estar ok, já que o parâmetro `revendedor_id` é o que vem da URL
-    return db.query(models.CarrinhoProduto).filter(models.CarrinhoProduto.fk_revendedor_id == revendedor_id).all() # Adicione .all() para retornar todos os resultados
-
+    # Lista todos os itens do carrinho de um revendedor, incluindo detalhes do produto
+    return db.query(models.CarrinhoProduto).options(joinedload(models.CarrinhoProduto.produto)).filter(
+        models.CarrinhoProduto.fk_revendedor_id == revendedor_id
+    ).all()
 
 def remover_Produto_carrinho(db: Session, revendedor_id: int, produto_id: int):
+    # Remove um produto específico do carrinho de um revendedor
     db_item = db.query(models.CarrinhoProduto).filter(
-        models.CarrinhoProduto.fk_revendedor_id == revendedor_id, # <--- CORRIGIDO
-        models.CarrinhoProduto.fk_produto_id == produto_id        # <--- CORRIGIDO
+        models.CarrinhoProduto.fk_revendedor_id == revendedor_id,
+        models.CarrinhoProduto.fk_produto_id == produto_id
     ).first()
     if db_item:
         db.delete(db_item)
@@ -38,11 +40,10 @@ def remover_Produto_carrinho(db: Session, revendedor_id: int, produto_id: int):
         return True
     return False
 
-
-# Limpar models.carrinho todo de um revendedor
 def limpar_carrinho(db: Session, revendedor_id: int):
-    itens = db.query(models.CarrinhoProduto).filter(models.CarrinhoProduto.fk_revendedor_id == revendedor_id).all() # Adicione .all() para buscar os itens
+    # Limpa todos os itens do carrinho de um revendedor
+    itens = db.query(models.CarrinhoProduto).filter(models.CarrinhoProduto.fk_revendedor_id == revendedor_id).all()
 
-    for Produto in itens: # Loop pelos itens para deletar
-        db.delete(Produto)
+    for item in itens: # Itera e deleta cada item
+        db.delete(item)
     db.commit()

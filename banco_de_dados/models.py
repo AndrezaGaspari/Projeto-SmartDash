@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, Date, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from .database import Base
 
-# Tabela de associação entre Pedido e Produto (Relacionamento N:N)
+# Tabela de associação para relacionamento N:N entre Pedido e Produto
 relacionamento_pedido_produto = Table(
     "relacionamento_3",
     Base.metadata,
@@ -13,16 +13,15 @@ relacionamento_pedido_produto = Table(
 class Loja(Base):
     __tablename__ = "loja"
     id = Column(Integer, primary_key=True, index=True)
-    # Campos que o frontend está enviando:
-    nome_fantasia = Column(String) # Novo campo
-    razao_social = Column(String)  # Novo campo
+    nome_fantasia = Column(String)
+    razao_social = Column(String)
     cnpj = Column(String)
     senha = Column(String)
     estado = Column(String)
     cidade = Column(String)
-    email = Column(String) # Novo campo
-    cep = Column(String)       # <--- NOVO CAMPO ADICIONADO
-    telefone = Column(String)  # <--- NOVO CAMPO ADICIONADO
+    email = Column(String)
+    cep = Column(String)
+    telefone = Column(String)
 
     produtos = relationship("Produto", back_populates="loja")
     revendedores = relationship("Revendedor", back_populates="loja")
@@ -38,12 +37,11 @@ class Produto(Base):
     valor_produto = Column(Float)
     categoria = Column(String)
     fk_loja_id = Column(Integer, ForeignKey("loja.id"))
-    imagem = Column(String, nullable=True) # Campo para a URL da imagem (String)
-    disponivel = Column(Boolean, default=True) # Adicione esta linha com um valor padrão
+    imagem = Column(String, nullable=True)
+    disponivel = Column(Boolean, default=True)
     
     loja = relationship("Loja", back_populates="produtos")
     pedidos = relationship("Pedido", secondary=relacionamento_pedido_produto, back_populates="produtos")
-
 
 class Revendedor(Base):
     __tablename__ = "revendedor"
@@ -66,7 +64,6 @@ class Revendedor(Base):
     loja = relationship("Loja", back_populates="revendedores")
     pedidos = relationship("Pedido", back_populates="revendedor")
 
-
 class Pedido(Base):
     __tablename__ = "pedido"
     id = Column(Integer, primary_key=True, index=True)
@@ -79,14 +76,12 @@ class Pedido(Base):
     revendedor = relationship("Revendedor", back_populates="pedidos")
     produtos = relationship("Produto", secondary=relacionamento_pedido_produto, back_populates="pedidos")
 
-
 class CarrinhoProduto(Base):
     __tablename__ = "carrinho_produto"
 
     id = Column(Integer, primary_key=True, index=True)
-    # ****** MUDANÇA CRUCIAL AQUI: REMOVA O PRIMEIRO ARGUMENTO STRING ******
-    fk_revendedor_id = Column(Integer, ForeignKey("revendedor.id")) # <--- CORRIGIDO
-    fk_produto_id = Column(Integer, ForeignKey("produto.id"))     # <--- CORRIGIDO
+    fk_revendedor_id = Column(Integer, ForeignKey("revendedor.id"))
+    fk_produto_id = Column(Integer, ForeignKey("produto.id"))
     quantidade = Column(Integer, nullable=False)
 
     produto = relationship("Produto")

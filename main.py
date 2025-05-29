@@ -5,23 +5,21 @@ from banco_de_dados import schemas
 from cruds import CadastroRevendedor, CarrinhoProdutos, CadastroProdutos, CadastroLojas
 from fastapi.middleware.cors import CORSMiddleware
 from banco_de_dados.schemas import LoginRevendedor , LoginLoja
-
-# Para servir arquivos estáticos (imagens)
 from fastapi.staticfiles import StaticFiles
-import os # Para lidar com caminhos de arquivo
-from typing import Optional # Para campos opcionais
-from datetime import date # Para campos de data
+import os 
+from typing import Optional 
+from datetime import date
 
 app = FastAPI()
 
-# --- SEÇÃO DE CONFIGURAÇÃO CORS ---
+# CONFIGURAÇÃO CORS 
 origins = [
-    "http://localhost:5173",  # ONDE SEU FRONTEND VUE ESTÁ RODANDO
-    "http://127.0.0.1:5173",  # E ESTA TAMBÉM É IMPORTANTE
-    "http://localhost:8080",  # Se você usa Vue CLI em vez de Vite, pode ser 8080
+    "http://localhost:5173",  
+    "http://127.0.0.1:5173",  
+    "http://localhost:8080", 
     "http://127.0.0.1:8080",
     "http://127.0.0.1:8000"
-    # Adicione outras origens se necessário, por exemplo, o domínio de produção
+    
 ]
 
 app.add_middleware(
@@ -31,23 +29,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# --- FIM DA SEÇÃO DE CONFIGURAÇÃO CORS ---
 
-# --- Configuração para servir arquivos estáticos (imagens) ---
-# Crie esta pasta na raiz do seu projeto FastAPI se ela não existir
+# Configuração imagens estaticas
+
 UPLOAD_DIRECTORY = "./static/images"
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
 
-# Monta o diretório 'static' para ser acessível via '/static' na URL
+# Monta o diretório estatico 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-# --- FIM DA CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS ---
 
 
-# Cria tabelas no banco de dados (apenas para desenvolvimento, use migrações em produção)
+
+# tabela banco de dados criada 
 Base.metadata.create_all(bind=Engine)
 
-# Dependência para obter sessão do banco
+# Dependência bd 
 def get_db():
     db = SessionLocal()
     try:
@@ -95,20 +92,20 @@ def login(dados: LoginRevendedor, db: Session = Depends(get_db)):
     return {"message": "Login de revendedor bem-sucedido!", "id": usuario.id, "email": usuario.email, "nome": usuario.nome}
 
 
-# ------------------- ROTAS DE PRODUTOS (AJUSTADAS PARA UPLOAD DE IMAGEM) -------------------
+# ------------------- ROTAS DE PRODUTOS  -------------------
 
 @app.post("/produtos", response_model=schemas.Produto, status_code=status.HTTP_201_CREATED)
-async def criar_produto( # Função agora é assíncrona para lidar com I/O de arquivo
+async def criar_produto(
     nome: str = Form(...),
     descricao: str = Form(...),
     categoria: str = Form(...),
     valor_produto: float = Form(...),
     quantidade: int = Form(...),
-    vencimento: Optional[date] = Form(None), # Use Form(None) para campos opcionais
-    fabricacao: Optional[date] = Form(None), # Use Form(None) para campos opcionais
-    disponivel: bool = Form(True), # Use Form(True) para valores padrão
+    vencimento: Optional[date] = Form(None), 
+    fabricacao: Optional[date] = Form(None), 
+    disponivel: bool = Form(True), 
     fk_loja_id: int = Form(...),
-    imagem: Optional[UploadFile] = File(None), # <<< Recebe o arquivo da imagem
+    imagem: Optional[UploadFile] = File(None), 
     db: Session = Depends(get_db)
 ):
     image_url = None
@@ -119,14 +116,14 @@ async def criar_produto( # Função agora é assíncrona para lidar com I/O de a
         unique_filename = f"{uuid.uuid4()}{file_extension}"
         file_path = os.path.join(UPLOAD_DIRECTORY, unique_filename)
 
-        # Salva o arquivo no diretório de uploads
+       
         try:
 
 
 
             with open(file_path, "wb") as buffer:
                 # Lê o arquivo em pedaços para lidar com arquivos grandes
-                while contents := await imagem.read(1024 * 1024): # Lê em blocos de 1MB
+                while contents := await imagem.read(1024 * 1024): 
                     buffer.write(contents)
             
             # Define a URL que será salva no banco e retornada para o frontend
@@ -135,8 +132,7 @@ async def criar_produto( # Função agora é assíncrona para lidar com I/O de a
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erro ao salvar imagem: {e}")
 
     # Cria o produto no banco de dados.
-    # Note que agora passamos os parâmetros individualmente, não um schema.ProdutoCreate
-    # diretamente, pois o UploadFile e Form são tratados separadamente.
+
     db_produto_data = {
         "nome": nome,
         "descricao": descricao,
@@ -151,7 +147,6 @@ async def criar_produto( # Função agora é assíncrona para lidar com I/O de a
     }
     
     # Cria uma instância do schema ProdutoCreate para validar os dados
-    # Isso é opcional, mas garante que os dados estejam no formato correto antes de passar para o CRUD
     produto_schema_instance = schemas.ProdutoCreate(**db_produto_data)
 
     # Chama a função de CRUD, que agora deve aceitar um schema.ProdutoCreate
@@ -215,7 +210,6 @@ def deletar_loja(loj_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Loja não encontradao")
     return loj
 
-# NOVO: Endpoint para login de lojas
 @app.post("/lojas/login")
 def login_loja(dados: LoginLoja, db: Session = Depends(get_db)):
     loja = CadastroLojas.verificar_login_loja(db, dados.email, dados.senha)
@@ -228,26 +222,20 @@ def login_loja(dados: LoginLoja, db: Session = Depends(get_db)):
 
 @app.post("/carrinho/adicionar", response_model=schemas.CarrinhoProduto, status_code=status.HTTP_201_CREATED)
 def adicionar_produto_carrinho(item: schemas.CarrinhoProdutoCreate, db: Session = Depends(get_db)):
-    # Ajustei o nome da rota para ser mais descritivo
     return CarrinhoProdutos.adicionar_Produto_carrinho(db, item)
 
-
-@app.get("/carrinho/{revendedor_id}", response_model=list[schemas.CarrinhoProduto])
+@app.get("/carrinho/{revendedor_id}", response_model=list[schemas.CarrinhoProdutoDisplay]) 
 def listar_itens_carrinho(revendedor_id: int, db: Session = Depends(get_db)):
-    # Ajustei o nome da rota para ser mais descritivo
     return CarrinhoProdutos.listar_Produto_carrinho(db, revendedor_id)
 
 @app.delete("/carrinho/item/{revendedor_id}/{produto_id}")
 def remover_item_carrinho(revendedor_id: int, produto_id: int, db: Session = Depends(get_db)):
-    # Ajustei o nome da rota para ser mais descritivo
     sucesso = CarrinhoProdutos.remover_Produto_carrinho(db, revendedor_id, produto_id)
     if not sucesso:
         raise HTTPException(status_code=404, detail="Item não encontrado no carrinho")
     return {"detail": "Item removido com sucesso do carrinho"}
 
-
 @app.delete("/carrinho/limpar/{revendedor_id}")
 def limpar_carrinho_completo(revendedor_id: int, db: Session = Depends(get_db)):
-    # Ajustei o nome da rota para ser mais descritivo
     CarrinhoProdutos.limpar_carrinho(db, revendedor_id)
     return {"detail": "Carrinho limpo com sucesso"}
